@@ -1,0 +1,147 @@
+---
+title: Guide to Firebase Hosting
+description: A step-by-step guide to deploying static Next.js website to Firebase Hosting with GitHub Actions.
+tags: [Firebase Hosting, GitHub Actions]
+---
+
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+
+## Firebase Hosting Setup
+
+### Prerequisites
+
+Before starting, make sure you have the following prerequisites:
+- A Firebase project
+- A GitHub repository
+- Node.js installed
+
+---
+
+### Step 1: Install Firebase Tools
+
+Run the command below on the project's root directory to install Firebase Tools locally:
+
+```sh
+npm install firebase-tools -D
+```
+
+<Callout>
+  Install Firebase tools locally ensures consistency across environments and avoids version conflicts.
+</Callout>
+
+### Step 2: Initialize Firebase Hosting
+
+Run the command below, which prompts you to authenticate with Firebase using your Google account:
+
+```sh
+npx firebase login
+```
+
+<Callout>
+  Make sure to use the same Google account associated with the Firebase project.
+</Callout>
+
+Next, run the command below and complete the initialization for Firebase Hosting:
+
+```sh
+npx firebase init hosting
+```
+
+<Callout>
+  The default **public directory** is **build** for **React.js**, and **out** for **Next.js**.
+</Callout>
+
+<Callout>
+  The **single-page app** option is **Yes** for **React.js**, and **No** for **Next.js**.
+</Callout>
+
+<Callout>
+  The **automatic builds and deploys with GitHub Actions** option should be **No**. It will be added later.
+</Callout>
+
+Then, modify the `next config` file to enable static export:
+<Tabs items={['TypeScript', 'JavaScript']}>
+  <Tab value="TypeScript">
+    ```ts
+    // next.config.ts
+    const nextConfig: NextConfig = {
+      output: 'export'
+    };
+    ```
+  </Tab>
+
+  <Tab value="JavaScript">
+    ```js
+    // next.config.mjs
+    const nextConfig = {
+      output: 'export'
+    };
+    ```
+  </Tab>
+</Tabs>
+
+And also modify the `firebase.json` file by adding the code section below
+in the hosting section to prevent the routing issue on refresh 
+for static Next.js websites deployed to Firebase Hosting:
+
+```json
+{
+  "hosting": {
+    ...,
+    "cleanUrls": true,
+    "rewrites": [
+      {
+        "source": "/**", 
+        "dynamicLinks": true
+      }
+    ]
+  }
+}
+```
+
+Lastly, run the following commands to build and deploy the project to Firebase Hosting:
+
+```sh
+npm run build
+```
+
+```sh
+npx firebase deploy --only hosting
+```
+
+The `.firebaserc` and `firebase.json` files are Firebase configuration files. 
+`.firebaserc` contains project deployment configurations, 
+while `firebase.json` defines server settings, redirects, and headers.
+
+### Step 3: Setup GitHub Actions (Optional)
+
+You may setup GitHub Actions to deploy your website to Firebase Hosting
+when there are changes pushed to the GitHub repository.
+
+Run the command below and complete the setup for GitHub Actions:
+```sh
+npx firebase init hosting:github
+```
+
+<Callout>
+  Select **Yes** for the **Setup build workflow**.
+</Callout>
+
+<Callout>
+  Enter the build script **npm install & npm run build**.
+</Callout>
+
+<Callout>
+  The **Auto-deploy on PR merge** option is optional. Choose as per project requirements.
+</Callout>
+
+### Step 4: Push to GitHub
+
+Commit and push the code to the GitHub repository to trigger 
+the GitHub Actions workflow (if configured) or deploy manually 
+using the Firebase CLI in Step 2.
+
+---
+
+That's it! The static Next.js website is now hosted on Firebase 
+Hosting with automated deployment via GitHub Actions.
