@@ -6,9 +6,8 @@ tags: [Firebase Hosting, GitHub Actions]
 
 import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
 
-## Firebase Hosting Setup
 
-### Prerequisites
+## Prerequisites
 
 Before starting, make sure you have the following prerequisites:
 - A Firebase project
@@ -17,7 +16,7 @@ Before starting, make sure you have the following prerequisites:
 
 ---
 
-### Step 1: Install Firebase Tools
+## Step 1: Install Firebase Tools
 
 Run the command below on the project's root directory to install Firebase Tools locally:
 
@@ -29,7 +28,7 @@ npm install firebase-tools -D
   Install Firebase tools locally ensures consistency across environments and avoids version conflicts.
 </Callout>
 
-### Step 2: Initialize Firebase Hosting
+## Step 2: Initialize Firebase Hosting
 
 Run the command below, which prompts you to authenticate with Firebase using your Google account:
 
@@ -113,7 +112,7 @@ The `.firebaserc` and `firebase.json` files are Firebase configuration files.
 `.firebaserc` contains project deployment configurations, 
 while `firebase.json` defines server settings, redirects, and headers.
 
-### Step 3: Setup GitHub Actions (Optional)
+## Step 3: Setup GitHub Actions (Optional)
 
 You may setup GitHub Actions to deploy your website to Firebase Hosting
 when there are changes pushed to the GitHub repository.
@@ -135,7 +134,7 @@ npx firebase init hosting:github
   The **Auto-deploy on PR merge** option is optional. Choose as per project requirements.
 </Callout>
 
-### Step 4: Push to GitHub
+## Step 4: Push to GitHub
 
 Commit and push the code to the GitHub repository to trigger 
 the GitHub Actions workflow (if configured) or deploy manually 
