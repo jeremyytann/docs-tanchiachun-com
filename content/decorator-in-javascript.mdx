@@ -1,0 +1,88 @@
+---
+title: Decorators in JavaScript
+description: An overview of decorators in JavaScript, covering their purpose, usage, and practical examples in both class and function components.
+tags: [Decorator, JavaScript, React, TypeScript]
+---
+
+## What is a Decorator?
+A decorator is a design pattern that allows you to modify or extend the behavior of classes or functions in a reusable way. Decorators are commonly used for adding metadata, transforming classes or methods, or applying higher-order functionality to components or functions.
+
+---
+
+## Purpose of Decorators
+In JavaScript (especially in React and TypeScript), decorators serve to:
+- Enhance or modify the behavior of functions or class components.
+- Keep code modular and reusable by applying transformations cleanly.
+- Reduce redundancy by centralizing functionality in decorators instead of cluttering individual components.
+- Improve readability and maintainability by abstracting logic into reusable functions.
+
+---
+
+## How Are Decorators Used?
+### Example: Using Decorators with Class Components
+In React, decorators can be applied to class components to enhance or modify their behavior.
+
+```javascript
+function myDecorator(WrappedComponent) {
+  return class extends React.Component {
+    render() {
+      return <WrappedComponent {...this.props} />;
+    }
+  };
+}
+
+@myDecorator
+class MyComponent extends React.Component {
+  render() {
+    return <div>Hello, I am a decorated class component!</div>;
+  }
+}
+```
+
+<Callout>
+  The **myDecorator** function takes a component (**WrappedComponent**) and returns a new component that extends it.
+</Callout>
+
+<Callout>
+  The **@myDecorator** syntax is used (common in TypeScript and requires enabling **experimentalDecorators** in configuration).
+</Callout>
+
+The decorated component retains the behavior of the original component while extending its functionality.
+
+### Example: Using Decorators with Function Components
+Decorators can also be applied to functions to extend their behavior. This is useful for logging, caching, memoization, and performance monitoring.
+
+```javascript
+function logger(fn) {
+  return function (...args) {
+    console.log('Function called: ', fn.name);
+    const result = fn.apply(this, args);
+    console.log('Function result: ', result);
+    return result;
+  };
+}
+
+function add(a, b) {
+  return a + b;
+}
+
+const loggedAdd = logger(add);
+console.log(loggedAdd(1, 2));
+```
+
+<Callout>
+  The **logger** function takes another function (**fn**) as an argument and returns a new function that logs details before and after execution.
+</Callout>
+
+<Callout>
+  When calling **loggedAdd(1, 2)**, it logs the function name (**add**), executes the function, and logs the result.
+</Callout>
+
+This approach helps in debugging and monitoring function executions without modifying the original function.
+
+
+---
+
+## Conclusion
+Decorators are a powerful way to extend and modify functionality in JavaScript and React. Whether used with class components or function-based utilities, decorators provide a cleaner and modular approach to handling reusable logic.
+
