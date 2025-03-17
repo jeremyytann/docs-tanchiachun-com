@@ -4,8 +4,8 @@
     "---Introduction---",
     "index",
     "---JavaScript---",
-    "closure-in-javascript",
-    "decorator-in-javascript",
+    "closures",
+    "decorators",
     "---Next.js---",
     "guide-to-firebase-hosting"
   ]
