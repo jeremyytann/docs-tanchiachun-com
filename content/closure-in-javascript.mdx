@@ -1,0 +1,75 @@
+---
+title: Closures in JavaScript
+description: A deep dive into JavaScript closures, covering their advantages, disadvantages, and practical use cases.
+tags: [Closure, JavaScript]
+---
+
+## What is a Closure?
+A closure is a fundamental concept in JavaScript that allows a function to retain access to the variables of its outer function even after the outer function has finished executing. This behavior enables powerful programming patterns, such as data encapsulation and function factories.
+
+---
+
+## Advantages of Closures
+### 1. Data Encapsulation
+Closures help create private variables and functions within a specific scope. Since these variables are inaccessible from outside, they prevent unintended modifications, ensuring better security and integrity.
+
+### 2. Preservation of State
+When closures capture variables from their outer function, they preserve the state of those variables. This is particularly useful in scenarios like asynchronous operations, event handlers, or callback functions, where retaining the previous state is necessary.
+
+### 3. Function Factory
+Closures allow the creation of function factories — higher-order functions that return other functions with specific behavior or configuration. This pattern is useful for generating multiple functions with shared characteristics.
+
+### 4. Callback Functions
+Closures are frequently used in callback functions, ensuring that they can remember and access variables from their surrounding scope even when invoked later. This is a common practice in event handling and asynchronous programming.
+
+### 5. Memory Efficiency
+By leveraging closures, functions can share common variables and resources, reducing memory duplication and potentially enhancing performance.
+
+---
+
+## Disadvantages of Closures
+### 1. Increased Memory Consumption
+Since closures maintain references to their enclosing scope’s variables, they can prevent garbage collection, leading to higher memory usage, especially in long-lived functions.
+
+### 2. Complexity and Readability
+Excessive nesting of closures can make code difficult to read and maintain. It may also increase cognitive load, making it harder for developers to track the flow of logic.
+
+### 3. Debugging Challenges
+Debugging closures can be challenging, particularly when dealing with deeply nested functions or variables captured from different scopes.
+
+### 4. Stale Value Issue
+Closures capture variables by reference, not by value. If a variable changes after the closure is created but before it's invoked, the closure will use the updated value, which may lead to unexpected behavior.
+
+---
+
+## Example: Using Closures in a Function Factory
+```javascript
+function multiplier(factor) {
+  return function (number) {
+    return number * factor;
+  };
+}
+
+const double = multiplier(2);
+console.log(double(7)); // Output: 14
+```
+
+<Callout>
+  The **multiplier** function returns an inner function that multiplies a given number by the specified **factor**.
+</Callout>
+
+<Callout>
+  The returned function retains access to the **factor** variable even after **multiplier** has finished executing.
+</Callout>
+
+<Callout>
+The **double** function is created using **multiplier(2)**, meaning **factor** is fixed at **2**.
+</Callout>
+
+<Callout>
+When **double(7)** is called, it multiplies **7** by **2**, resulting in **14**.
+</Callout>
+
+---
+
+Closures are an essential JavaScript feature that, when used correctly, can lead to cleaner, more maintainable, and efficient code.

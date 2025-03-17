@@ -3,6 +3,8 @@
   "pages": [
     "---Introduction---",
     "index",
+    "---JavaScript---",
+    "closure-in-javascript",
     "---Next.js---",
     "guide-to-firebase-hosting"
   ]
