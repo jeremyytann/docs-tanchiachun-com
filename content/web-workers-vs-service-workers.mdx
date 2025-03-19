@@ -1,0 +1,69 @@
+---
+title: Web Workers and Service Workers
+description: Learn about Web Workers and Service Workers in JavaScript, their differences, use cases, and when to use each.
+tags: [Web API, JavaScript, Performance, PWA]
+---
+
+## What is a Web Worker?
+A **Web Worker** is a JavaScript script that runs in the background, independently of the user interface, allowing for parallel execution of tasks. This enables developers to perform time-consuming or computationally intensive operations without blocking the main thread of the web page. 
+
+Web Workers improve the responsiveness of web applications by offloading tasks to separate threads, which helps prevent the UI from freezing or becoming unresponsive.
+
+### Key Features of Web Worker
+- Runs in a separate thread from the main JavaScript execution thread.
+- Communicates with the main thread using a messaging system (`postMessage`).
+- Cannot directly access the **DOM** or modify the UI.
+- Useful for tasks like complex calculations, data processing, and real-time computations that don't require direct interaction with the user interface.
+
+### Use Cases of Web Worker
+- Performing **parallel processing** tasks that require high computation.
+- Handling **large data processing** or complex calculations.
+- Running **task isolation** to prevent UI blocking.
+
+---
+
+## What is a Service Worker?
+A **Service Worker** is a special type of Web Worker that acts as a programmable proxy between a web application and the network. It runs in the background and can intercept and handle network requests made by the web page. 
+
+Service Workers enable powerful features like:
+- Offline support
+- Push notifications
+- Background synchronization
+- Resource caching
+
+Service Workers are crucial for building **Progressive Web Applications (PWAs)** that offer a more seamless and reliable user experience, even in offline or low-connectivity scenarios.
+
+### Key Features of Service Worker
+- Runs in a separate thread and doesn’t have direct access to the **DOM**.
+- Can intercept and modify network requests.
+- Can cache resources for offline use.
+- Can handle push notifications and background sync.
+
+### Use Cases of Service Worker
+- Implementing **push notifications** for web applications.
+- Enabling **offline support** and caching resources.
+- Managing **network-related tasks** efficiently.
+- Handling **background sync** for improved user experience.
+
+---
+
+## Key Differences: Web Worker vs Service Worker
+| Feature | Web Worker | Service Worker |
+|---------|-----------|---------------|
+| **Purpose** | Parallelizing tasks and offloading computations to separate threads, improving the performance of web applications. | Handling network requests, caching resources, and providing advanced features like offline support and push notifications. |
+| **Thread Isolation** | Runs in a separate thread from the main JavaScript execution thread, helping to prevent freezing of the UI. | Also runs in a separate thread, designed specifically for handling network-related tasks in the background. |
+| **Access to DOM** | No direct access to DOM | No direct access to DOM |
+| **Use Cases** | Computational tasks, data processing | Offline support, push notifications, background sync |
+
+---
+
+## Conclusion
+Web Workers and Service Workers both run in separate threads but serve different purposes. **Web Workers** are designed for computation-heavy tasks to keep the UI responsive, while **Service Workers** handle network-related features like offline caching and push notifications. Understanding their differences will help developers enhance the performance and user experience of web applications effectively.
+
+---
+
+## References
+
+[Web Workers Explained](https://www.youtube.com/watch?v=JMKLXGwltGc)
+
+[Web Workers vs Service Workers: What's the real difference?](https://www.youtube.com/watch?v=Iz5f3ctn1W8)
