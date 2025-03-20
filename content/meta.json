@@ -9,6 +9,9 @@
     "web-workers-vs-service-workers",
     "---Next.js---",
     "ssr-vs-csr",
-    "guide-to-firebase-hosting"
+    "guide-to-firebase-hosting",
+    "---React---",
+    "diffing-algorithm",
+    "virtual-dom"
   ]
 }
