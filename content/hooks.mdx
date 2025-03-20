@@ -1,0 +1,69 @@
+---
+title: Hooks
+description: Learn about hooks in React, why they were introduced, and how they differ from class components.
+tags: [React, Hooks, Functional Components, State Management, useState, useEffect, useMemo, useCallback]
+---
+
+## What are Hooks?
+In React, **hooks** are functions that allow functional components to manage **state, lifecycle events, and side effects**. They enable developers to use stateful logic in functional components without the need for class-based syntax. Hooks improve **code reusability**, **readability**, and make it easier to share logic across components.
+
+---
+
+## Why Were Hooks Introduced?  
+React introduced hooks to solve several challenges with class components:
+
+1. **Complex Code with Constructors**  
+   - Class components require **constructors** and **lifecycle methods** to manage state, making the code complex.  
+   - Hooks like `useState` and `useReducer` simplify state management in **functional components**.
+
+2. **Reusability of Logic**  
+   - Stateful logic in class components is **not easily reusable** across multiple components.  
+   - **Custom hooks** allow developers to encapsulate and share logic without needing **Higher-Order Components (HOCs)** or **Render Props**.
+
+3. **Simplified Lifecycle Management**  
+   - Lifecycle methods like `componentDidMount`, `componentDidUpdate`, and `componentWillUnmount` can be **confusing** and prone to **bugs**.  
+   - The `useEffect` hook provides a **unified way** to handle **side effects** in functional components.
+
+4. **Performance Optimization Challenges**  
+   - Class components had **limitations** in optimizing performance.  
+   - Hooks like `useMemo` and `useCallback` provide **better control over memoization**, preventing **unnecessary re-renders**.
+
+Hooks enhance React’s development experience by making functional components **more readable, scalable, and maintainable**.
+
+---
+
+## Difference Between useCallback and useMemo
+The `useCallback` and `useMemo` hooks are similar but serve different purposes:
+
+- **`useCallback`** → Returns a **memoized function**.
+  - Used to **cache a function definition** between re-renders.
+- **`useMemo`** → Returns a **memoized value**.
+  - Used to **cache the result of a computation** between re-renders.
+
+---
+
+## Example: Using useCallback and useMemo
+
+```tsx
+import { useCallback, useMemo, useState } from "react";
+
+function ExampleComponent({ items }) {
+  const [count, setCount] = useState(0);
+
+  // useMemo caches a computed value
+  const computedValue = useMemo(() => {
+    return items.reduce((total, item) => total + item.price, 0);
+  }, [items]);
+
+  // useCallback caches a function reference
+  const handleClick = useCallback(() => {
+    setCount((prev) => prev + 1);
+  }, []);
+
+  return (
+    <div>
+      <p>Total Price: {computedValue}</p>
+      <button onClick={handleClick}>Increment ({count})</button>
+    </div>
+  );
+}
