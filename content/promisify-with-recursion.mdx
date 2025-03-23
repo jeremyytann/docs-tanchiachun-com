@@ -1,0 +1,66 @@
+---
+title: "Promisify with Recursion"
+description: "Understanding how to use Promisify with recursion to handle asynchronous functions."
+tags: [JavaScript, Promisify, Recursion, Asynchronous]
+---
+
+## What is Promisify?
+
+In JavaScript, **promisify** refers to converting a function that follows the **traditional callback-style asynchronous pattern** into a function that **returns a Promise**.
+
+This is useful when working with legacy APIs or functions that rely on callbacks, as Promises provide a more structured and readable way to handle asynchronous operations.
+
+---
+
+## Implementing Promisify with Recursion
+
+Here, we define an example where a list of Promises is executed **recursively**, ensuring that each Promise resolves before moving on to the next.
+
+### Example: Recursive Promise Execution
+
+```javascript
+const promiseList = [
+  new Promise((resolve) => {
+    console.log("Promise 1 resolved.");
+    resolve("Promise 1 resolved.");
+  }),
+  new Promise((resolve) => {
+    console.log("Promise 2 resolved.");
+    resolve("Promise 2 resolved.");
+  }),
+  new Promise((resolve) => {
+    console.log("Promise 3 resolved.");
+    resolve("Promise 3 resolved.");
+  }),
+];
+
+function promiseFunc(promiseList, index = 0) {
+  if (index >= promiseList.length) {
+    console.log("All promises resolved.");
+    return Promise.resolve("Done.");
+  }
+
+  return promiseList[index].then(() => {
+    return promiseFunc(promiseList, index + 1);
+  });
+}
+
+promiseFunc(promiseList).then((result) => console.log(result));
+```
+
+### Explanation
+1. **Base Case:** If `index` is greater than or equal to the length of `promiseList`, the function resolves with "Done." and stops execution.
+2. **Recursive Case:** The function executes the current Promise and then **recursively calls itself** with the next index.
+3. **Ensures Sequential Execution:** Each Promise **waits** for the previous one to complete before proceeding.
+4. **Returns a Promise:** The function always returns a Promise, making it chainable.
+
+---
+
+## Why Use Recursion?
+- Ensures **each asynchronous operation completes** before starting the next.
+- Eliminates the need for loops with `await`, keeping the code **functional and clean**.
+- Works well when handling **dynamic lists** of asynchronous tasks.
+
+---
+
+By applying **promisify with recursion**, we can create **better control flow** for async operations in JavaScript.
