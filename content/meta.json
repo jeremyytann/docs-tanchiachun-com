@@ -12,6 +12,7 @@
     "ssr-vs-csr",
     "guide-to-firebase-hosting",
     "---React---",
+    "avoiding-unnecessary-re-renders",
     "diffing-algorithm",
     "hooks",
     "virtual-dom"

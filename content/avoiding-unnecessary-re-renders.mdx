@@ -1,0 +1,137 @@
+---
+title: Avoiding Unnecessary Re-Renders
+description: Learn how to optimize performance in React by preventing unnecessary re-renders using React.memo, useMemo, useCallback, and other best practices.
+tags: [React, Performance Optimization, Memoization, useMemo, useCallback]
+---
+
+## Why Prevent Unnecessary Re-Renders?  
+React re-renders components when their **state** or **props** change. However, unnecessary re-renders can lead to **performance issues**, especially in large applications. By **optimizing renders**, we can improve **application speed and efficiency**.
+
+---
+
+## Strategies to Avoid Unnecessary Re-Renders
+
+Improving performance in React applications involves reducing unnecessary renders. Below are effective techniques to optimize your components.
+
+### 1. Use `React.memo` for Functional Components
+Wrap functional components with `React.memo` to prevent re-renders when props remain unchanged.
+
+```jsx
+import React from 'react';
+
+const MyComponent = React.memo(({ value }) => {
+  console.log("Rendered");
+  return <p>{value}</p>;
+});
+```
+
+### 2. Memoize Callback Functions with `useCallback`
+Use `useCallback` to avoid re-creating functions on each render, reducing unnecessary renders in child components.
+
+```jsx
+import React, { useState, useCallback } from 'react';
+
+const Child = React.memo(({ handleClick }) => {
+  console.log("Child Rendered");
+  return <button onClick={handleClick}>Click Me</button>;
+});
+
+const Parent = () => {
+  const [count, setCount] = useState(0);
+  const memoizedHandleClick = useCallback(() => setCount((c) => c + 1), []);
+
+  return (
+    <>
+      <Child handleClick={memoizedHandleClick} />
+      <p>Count: {count}</p>
+    </>
+  );
+};
+```
+
+### 3. Optimize Expensive Computations with `useMemo`
+Use `useMemo` to memoize expensive computations and prevent unnecessary recalculations.
+
+```jsx
+import React, { useState, useMemo } from 'react';
+
+const ExpensiveComponent = ({ num }) => {
+  const compute = (n) => {
+    console.log("Expensive computation");
+    return n * 2;
+  };
+
+  const memoizedValue = useMemo(() => compute(num), [num]);
+
+  return <p>Computed Value: {memoizedValue}</p>;
+};
+```
+
+### 4. Avoid Inline Function Definitions
+Defining functions inside the render method creates new instances on every render, causing unnecessary updates.
+
+```jsx
+// BAD PRACTICE
+const MyComponent = ({ onClick }) => {
+  return <button onClick={() => onClick()}>Click</button>;
+};
+```
+
+```jsx
+// BETTER PRACTICE
+const MyComponent = ({ onClick }) => {
+  const handleClick = useCallback(() => onClick(), [onClick]);
+  return <button onClick={handleClick}>Click</button>;
+};
+```
+
+### 5. Optimize Context Consumers
+Using `useContext` directly in components can lead to unnecessary re-renders whenever context updates.
+
+```jsx
+const MyComponent = () => {
+  const contextValue = React.useContext(MyContext);
+  return <p>{contextValue}</p>; // Re-renders when context changes
+};
+```
+**Solution:** Extract only the necessary values or use context selectors to minimize renders.
+
+### 6. Memoize Props at the Parent Level
+Memoizing stable props at the parent level prevents child components from re-rendering unnecessarily.
+
+```jsx
+const Parent = () => {
+  const memoizedData = useMemo(() => ({ key: "value" }), []);
+  return <Child data={memoizedData} />;
+};
+```
+
+### 7. Check for Reference Equality
+When passing objects or arrays as props, ensure reference equality using `useMemo` to avoid unnecessary updates.
+
+```jsx
+const MyComponent = ({ data }) => {
+  return <p>{data.name}</p>;
+};
+
+// Ensuring reference stability
+const Parent = () => {
+  const memoizedData = useMemo(() => ({ name: "John" }), []);
+  return <MyComponent data={memoizedData} />;
+};
+```
+
+### 8. Use `PureComponent` for Class Components
+For class components, extending `React.PureComponent` ensures a shallow prop and state comparison to prevent redundant renders.
+
+```jsx
+class MyComponent extends React.PureComponent {
+  render() {
+    return <p>{this.props.value}</p>;
+  }
+}
+```
+
+---
+
+By applying these optimization techniques, you can significantly improve the performance of React applications and provide a smoother user experience.
