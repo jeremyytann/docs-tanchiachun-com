@@ -13,6 +13,7 @@
     "guide-to-firebase-hosting",
     "---React---",
     "avoiding-unnecessary-re-renders",
+    "controlled-and-uncontrolled-components",
     "diffing-algorithm",
     "hooks",
     "routers",

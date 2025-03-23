@@ -1,0 +1,80 @@
+---
+title: "Controlled and Uncontrolled Components"
+description: "Understanding the differences and use cases of controlled and uncontrolled components in React."
+---
+
+In React, form elements can be managed in two ways: **controlled** and **uncontrolled** components.
+
+---
+
+## Controlled Components
+A **controlled component** is a form element whose value is controlled by React state. The component’s state dictates the value of the input field, and updates are managed through an `onChange` event handler.
+
+### Example: Controlled Component
+```jsx
+import React, { useState } from 'react';
+
+const ControlledInput = () => {
+  const [value, setValue] = useState('');
+
+  const handleChange = (event) => {
+    setValue(event.target.value);
+  };
+
+  return (
+    <input type="text" value={value} onChange={handleChange} />
+  );
+};
+```
+**Key Features:**
+- The value of the input is controlled via React state (`useState`).
+- Every change to the input triggers `setValue`, keeping React in control.
+- Easier to enforce validation, conditional rendering, and controlled behavior.
+
+---
+
+## Uncontrolled Components
+An **uncontrolled component** allows the DOM to handle the state instead of React. You can access the input value using `useRef` but React does not manage its state.
+
+### Example: Uncontrolled Component
+```jsx
+import React, { useRef } from 'react';
+
+const UncontrolledInput = () => {
+  const inputRef = useRef(null);
+
+  const handleSubmit = () => {
+    alert(`Input Value: ${inputRef.current.value}`);
+  };
+
+  return (
+    <>
+      <input type="text" ref={inputRef} />
+      <button onClick={handleSubmit}>Submit</button>
+    </>
+  );
+};
+```
+**Key Features:**
+- The value is not stored in React state but in the DOM.
+- Uses `ref` to get the value when needed.
+- Suitable for simple forms where React state management is unnecessary.
+
+---
+
+## When to Choose Between Controlled and Uncontrolled Components?
+
+| Criteria | Controlled Components | Uncontrolled Components |
+|----------|----------------------|----------------------|
+| **State Management** | Managed by React state (`useState`) | Managed by the DOM |
+| **Validation** | Easier to implement validation on each change | More complex to validate dynamically |
+| **Performance** | Can cause extra re-renders when state updates | More performant in simple cases |
+| **Use Case** | Best for forms with complex validation, dynamic behavior, or controlled updates | Best for simple forms or integrating with non-React code (e.g., vanilla JavaScript plugins) |
+
+---
+
+## Conclusion
+- Use **controlled components** when you need to track and manipulate form input values dynamically within React.
+- Use **uncontrolled components** when React state management is unnecessary, such as simple forms or integrating with third-party libraries.
+
+By choosing the right approach, you can optimize form handling in React applications efficiently.
