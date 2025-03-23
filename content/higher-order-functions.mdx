@@ -1,0 +1,86 @@
+---
+title: Higher-Order Functions
+description: Learn about higher-order functions, their uses, advantages, and disadvantages.
+tags: [JavaScript, React, Higher-Order Functions, Code Reusability, Component Composition]
+---
+
+## What is a Higher-Order Function?  
+In React, a **higher-order function (HOF)** is a function that takes a **component** as an argument and returns a **new enhanced component** with additional **props** or **behavior**. This pattern is commonly used for **code reuse, logic abstraction, and component composition**.
+
+<Callout>
+Higher-order functions are **not part of the React API** but a **JavaScript pattern** frequently used in React development.
+</Callout>
+
+---
+
+## How Are Higher-Order Functions Used?
+Higher-order functions serve multiple purposes in React applications:
+
+1. **Reusing Component Logic**  
+   - Encapsulate common logic or behavior and apply it to multiple components.  
+2. **Prop Manipulation**  
+   - Add, modify, or filter props before passing them to the wrapped component.  
+3. **Conditional Rendering**  
+   - Render components dynamically based on specific conditions.  
+4. **Authentication Handling**  
+   - Enforce authentication logic before rendering a component.  
+5. **State Management**  
+   - Manage and provide state to multiple components or handle state updates.
+
+---
+
+## Advantages of Higher-Order Functions
+
+1. **Reusability**  
+   - Promote **code reuse** by encapsulating logic that can be applied to multiple components.  
+2. **Composition**  
+   - Enable **component composition**, allowing developers to build complex components by combining simpler ones.  
+3. **Abstraction of Concerns**  
+   - Separate concerns like **data fetching, authentication, or state management** from the presentation layer.  
+4. **Props Manipulation**  
+   - Modify or enhance props before passing them to the wrapped component.
+
+---
+
+## Disadvantages of Higher-Order Functions
+
+1. **Prop Drilling**  
+   - Can introduce **prop drilling**, making the component tree **harder to understand**.  
+2. **Naming Collisions**  
+   - May cause **naming conflicts** if not structured properly, leading to **hard-to-debug** issues.  
+3. **Increased Complexity**  
+   - Overuse of HOFs can result in **deeply nested and hard-to-maintain** components.
+
+---
+
+## Example: Higher-Order Function
+
+Below is an example of a **higher-order function** that adds an authentication check to a component:
+
+```tsx
+import React from "react";
+
+// Higher-Order Function: WithAuth
+const withAuth = (WrappedComponent) => {
+  return (props) => {
+    const isAuthenticated = true; // Assume authentication logic here
+
+    if (!isAuthenticated) {
+      return <h2>Access Denied. Please log in.</h2>;
+    }
+
+    return <WrappedComponent {...props} />;
+  };
+};
+
+// Regular component
+const Dashboard = () => {
+  return <h2>Welcome to the Dashboard!</h2>;
+};
+
+// Enhanced component using HOF
+const ProtectedDashboard = withAuth(Dashboard);
+
+export default function App() {
+  return <ProtectedDashboard />;
+}

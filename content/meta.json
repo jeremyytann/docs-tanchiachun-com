@@ -6,6 +6,7 @@
     "---JavaScript---",
     "closures",
     "decorators",
+    "higher-order-functions",
     "web-workers-vs-service-workers",
     "---Next.js---",
     "ssr-vs-csr",
