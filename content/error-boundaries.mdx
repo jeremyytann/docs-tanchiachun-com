@@ -1,0 +1,124 @@
+---
+title: "Error Boundaries"
+description: "Understanding and using error boundaries to handle errors in React applications."
+tags: [React, Error Boundaries, Error Handling, Debugging]
+---
+
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+
+## What Are Error Boundaries?
+Error boundaries are special React components that catch JavaScript errors **during rendering**, **in lifecycle methods**, and **in constructors** of components **below them** in the component tree. Instead of causing the entire application to crash, error boundaries log the errors and render a **fallback UI**.
+
+---
+
+## Why Use Error Boundaries?
+### 1. Prevent Full Application Crashes
+Without error boundaries, an error in one component can cause the entire application to break. Error boundaries allow **graceful degradation** by catching errors and displaying an alternative UI.
+
+### 2. Isolate Errors to Specific Components
+Error boundaries confine errors to the component subtree where they occur, preventing them from affecting unrelated parts of the application.
+
+### 3. Log Errors for Debugging
+They provide a structured way to **log errors** (e.g., sending them to an external logging service like Sentry or LogRocket) to help diagnose and fix issues.
+
+---
+
+## When Not to Use Error Boundaries
+- **Event Handlers**: Error boundaries do not catch errors inside event handlers. You need to use **try-catch** within event handlers.
+- **Asynchronous Code**: Promises and async functions are not caught by error boundaries. Use `.catch()` for handling promise rejections.
+- **Server-Side Rendering (SSR)**: Error boundaries do not catch errors during SSR since they only work in the browser.
+
+---
+
+## Implementing an Error Boundary
+Error boundaries are **class components** that use the lifecycle methods `static getDerivedStateFromError` and `componentDidCatch` to catch and handle errors.
+
+### Example: Error Boundary Components
+<Tabs items={['Class Component', 'Function Component']}>
+  <Tab value="Class Component">
+    ```jsx
+    import React from "react";
+
+    class ErrorBoundary extends React.Component {
+      constructor(props) {
+        super(props);
+        this.state = { hasError: false };
+      }
+
+      static getDerivedStateFromError(error) {
+        // Update state so the next render shows the fallback UI
+        return { hasError: true };
+      }
+
+      componentDidCatch(error, info) {
+        console.error("Error caught by Error Boundary:", error, info);
+        // You can log the error to an external service here
+      }
+
+      render() {
+        if (this.state.hasError) {
+          return <h2>Something went wrong. Please try again later.</h2>;
+        }
+        
+        return this.props.children;
+      }
+    }
+
+    export default ErrorBoundary;
+    ```
+  </Tab>
+
+  <Tab value="Function Component">
+    ```jsx
+    import React, { useState, useEffect } from "react";
+
+    const ErrorBoundary = ({ children }) => {
+      const [hasError, setHasError] = useState(false);
+
+      useEffect(() => {
+        const errorHandler = (event) => {
+          event.preventDefault();
+          setHasError(true);
+        };
+        
+        window.addEventListener("error", errorHandler);
+        return () => window.removeEventListener("error", errorHandler);
+      }, []);
+
+      if (hasError) {
+        return <h2>Something went wrong. Please try again later.</h2>;
+      }
+
+      return children;
+    };
+
+    export default ErrorBoundary;
+    ```
+  </Tab>
+</Tabs>
+
+Wrap your components inside the `ErrorBoundary` to catch errors and prevent crashes.
+
+```jsx
+import ErrorBoundary from "./ErrorBoundary";
+import MyComponent from "./MyComponent";
+
+function App() {
+  return (
+    <ErrorBoundary>
+      <MyComponent />
+    </ErrorBoundary>
+  );
+}
+```
+
+---
+
+## Best Practices
+- Wrap high-risk components (e.g., third-party components, dynamic UI elements) with an error boundary.
+- Log errors to an external service for monitoring and debugging.
+- Provide a meaningful fallback UI to improve user experience.
+
+---
+
+By implementing error boundaries, you can build more **resilient** and **user-friendly** React applications.

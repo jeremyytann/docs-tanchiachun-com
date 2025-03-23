@@ -15,6 +15,7 @@
     "avoiding-unnecessary-re-renders",
     "controlled-and-uncontrolled-components",
     "diffing-algorithm",
+    "error-boundaries",
     "hooks",
     "routers",
     "virtual-dom"
