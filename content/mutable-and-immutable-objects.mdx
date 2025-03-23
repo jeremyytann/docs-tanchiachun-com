@@ -1,0 +1,58 @@
+---
+title: "Mutable and Immutable Objects"
+description: "Understanding the differences between mutable and immutable objects in programming."
+tags: [JavaScript, Objects, Immutability, Mutability]
+---
+
+## What Are Mutable Objects?
+Mutable objects are those whose **state (values) can be modified** after the object is created. This means you can update properties or elements of a mutable object, and those changes are reflected in the same object without creating a new instance.
+
+### Advantages of Mutable Objects
+- **Memory Efficiency:** Mutable objects allow modifications **in-place**, which can save memory.
+- **Flexibility:** They allow dynamic changes, making them suitable for scenarios that require frequent modifications.
+- **Performance:** In some cases, modifying an existing object is faster than creating a new one.
+
+### Example: Mutable Objects:
+In JavaScript, objects and arrays are **mutable** by default:
+```javascript
+let person = { name: "Alice", age: 25 };
+person.age = 26;  // Modifying the object
+console.log(person); // { name: "Alice", age: 26 }
+```
+
+---
+
+## What Are Immutable Objects?
+Immutable objects, on the other hand, **cannot be changed** after creation. Any operation that seems to modify an immutable object actually **creates a new object** with the updated state instead of altering the original.
+
+### Advantages of Immutable Objects
+- **Predictability:** Since values never change, there's less risk of unintended modifications and debugging becomes easier.
+- **Thread Safety:** Immutable objects prevent race conditions in concurrent applications because their state can't change.
+- **Hashability:** Since their values don't change, immutable objects can be used as keys in dictionaries or elements in sets.
+
+### Example: Immutable Objects:
+In JavaScript, primitive types such as `string`, `number`, and `boolean` are immutable:
+
+```javascript
+let str = "Hello";
+str[0] = "h";  // No effect
+console.log(str); // "Hello"
+```
+
+To work with immutable objects in JavaScript, you can use **Object.freeze()** or spread operators to create a new object:
+
+```javascript
+const obj = Object.freeze({ name: "Bob" });
+obj.name = "Charlie";  // This won't change the object
+console.log(obj.name); // "Bob"
+```
+
+---
+
+## When to Use Mutable and Immutable Objects
+- **Use Mutable Objects** when performance and memory efficiency are critical, such as updating a large dataset frequently.
+- **Use Immutable Objects** when maintaining state consistency is important, such as in functional programming or React state management.
+
+---
+
+By understanding when and where to use **mutable and immutable** objects, developers can write more efficient and predictable code.
