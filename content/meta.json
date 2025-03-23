@@ -15,6 +15,7 @@
     "avoiding-unnecessary-re-renders",
     "diffing-algorithm",
     "hooks",
+    "routers",
     "virtual-dom"
   ]
 }

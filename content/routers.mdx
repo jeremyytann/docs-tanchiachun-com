@@ -1,0 +1,85 @@
+---
+title: "Routers"
+description: "Understanding routing in React applications."
+tags: [React, Router, Navigation]
+---
+
+## What is Router in React?
+
+In React, a router is a component or library that provides navigation and manages the application's URL. It enables the creation of single-page applications (SPAs) with multiple views or pages while maintaining smooth transitions between them.
+
+---
+
+## Types of Routers in React
+
+### 1. BrowserRouter
+`BrowserRouter` uses the HTML5 history API to keep the UI in sync with the URL, providing a clean and user-friendly URL structure.
+
+```jsx
+import { BrowserRouter, Route } from "react-router-dom";
+
+function App() {
+  return (
+    <BrowserRouter>
+      <Route path="/home" component={HomePage} />
+    </BrowserRouter>
+  );
+}
+```
+
+### 2. Route
+The `Route` component maps a URL path to a corresponding React component that should be rendered when the path matches.
+
+```jsx
+<Route path="/about" component={AboutPage} />
+```
+
+### 3. Link and NavLink
+- `Link` is used for navigation without a full page reload.
+- `NavLink` is similar to `Link` but provides styling options for the active link.
+
+```jsx
+import { Link, NavLink } from "react-router-dom";
+
+<Link to="/home">Go to Home</Link>
+<NavLink to="/about" activeClassName="active">About</NavLink>
+```
+
+### 4. Switch
+`Switch` ensures that only the first matching route is rendered, preventing multiple matches.
+
+```jsx
+import { Switch, Route } from "react-router-dom";
+
+<Switch>
+  <Route exact path="/" component={HomePage} />
+  <Route path="/about" component={AboutPage} />
+</Switch>
+```
+
+---
+
+## Alternative Routers for React
+
+### 1. react-router-redux
+This integrates `react-router` with Redux, allowing centralized state and routing management.
+
+### 2. react-spring-router
+Combines `react-router` with React Spring for animated transitions between routes.
+
+---
+
+## Difference Between react-router, react-router-dom, and react-router-native
+
+### 1. react-router
+The core package that provides routing functionality for any React environment, including web, mobile, and server-side rendering (SSR).
+
+### 2. react-router-dom
+Built on top of `react-router`, it is tailored for web applications and includes components optimized for browsers.
+
+### 3. react-router-native
+Designed for React Native applications, offering components optimized for mobile app development.
+
+---
+
+By understanding React Router and its alternatives, you can build seamless and dynamic SPAs with effective navigation.
