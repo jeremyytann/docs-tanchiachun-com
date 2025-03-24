@@ -1,0 +1,91 @@
+---
+title: "Semantic HTML"
+description: "Understanding the importance of semantic HTML and its impact on accessibility, SEO, and maintainability."
+tags: [Frontend, HTML, Web Development, Accessibility, SEO]
+---
+
+## What is Semantic HTML?
+Semantic HTML refers to the practice of using HTML elements that provide meaningful information about the content and structure of a webpage. Instead of relying on generic tags like `<div>` and `<span>`, semantic HTML utilizes elements that describe their purpose, making the content more understandable for browsers, developers, and assistive technologies.
+
+---
+
+## Why is Semantic HTML Important?
+### 1. Accessibility
+Semantic HTML enhances accessibility by allowing assistive technologies, such as screen readers, to interpret content more effectively. This improves the browsing experience for users with disabilities.
+
+### 2. SEO (Search Engine Optimization)
+Search engines use semantic HTML to better understand webpage content. Properly structured pages with meaningful tags improve search engine rankings, leading to better visibility.
+
+### 3. Code Readability & Maintainability
+Using semantic tags makes the code more readable, structured, and maintainable. Developers can easily understand the purpose of different elements, making collaboration and updates more efficient.
+
+---
+
+## Common Semantic HTML Elements and Their Purpose
+Here are some key semantic HTML elements and their roles:
+
+| Tag | Purpose |
+|------|---------|
+| `<header>` | Defines the header section of a document or section. |
+| `<nav>` | Represents navigation links. |
+| `<section>` | Groups related content within a document. |
+| `<article>` | Represents self-contained content, such as a blog post or news article. |
+| `<aside>` | Defines content that is tangentially related to the main content, such as sidebars. |
+| `<footer>` | Represents the footer section, typically containing metadata or links. |
+| `<main>` | Identifies the main content of the document. |
+| `<figure>` | Encapsulates media like images, diagrams, or code snippets, along with captions using `<figcaption>`. |
+
+---
+
+## Example: Using Semantic HTML
+Instead of writing:
+```html
+<div class="header">My Website</div>
+
+<div class="nav">
+  <a href="#">Home</a>
+  <a href="#">About</a>
+</div>
+
+<div class="content">
+  <h2>Welcome</h2>
+  <p>This is my website.</p>
+</div>
+
+<div class="footer">
+  &copy; 2025 My Website
+</div>
+```
+
+Use semantic HTML:
+```html
+<header>
+  <h1>My Website</h1>
+</header>
+
+<nav>
+  <a href="#">Home</a>
+  <a href="#">About</a>
+</nav>
+
+<main>
+  <section>
+    <h2>Welcome</h2>
+    <p>This is my website.</p>
+  </section>
+</main>
+
+<footer>
+  &copy; 2025 My Website
+</footer>
+```
+
+---
+
+## Best Practices for Semantic HTML
+- Use semantic elements where applicable, instead of `<div>` or `<span>`.
+- Structure your document logically with headings (`<h1>` to `<h6>`).
+- Ensure elements are used correctly (e.g., `<article>` for self-contained content).
+- Combine semantic elements with ARIA roles when additional accessibility support is needed.
+
+By incorporating semantic HTML, you create more meaningful, accessible, and maintainable web pages that benefit both users and developers.

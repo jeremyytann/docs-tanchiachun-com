@@ -3,6 +3,8 @@
   "pages": [
     "---Introduction---",
     "index",
+    "---Frontend---",
+    "semantic-html",
     "---JavaScript---",
     "closures",
     "decorators",
