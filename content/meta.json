@@ -3,6 +3,8 @@
   "pages": [
     "---Introduction---",
     "index",
+    "---DevOps---",
+    "deployment-strategies",
     "---Frontend---",
     "meta-tags",
     "responsive-and-mobile-friendly-web-design",
