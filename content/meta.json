@@ -20,6 +20,7 @@
     "guide-to-firebase-hosting",
     "ssr-vs-csr",
     "---React---",
+    "api-integration",
     "avoiding-unnecessary-re-renders",
     "controlled-and-uncontrolled-components",
     "diffing-algorithm",

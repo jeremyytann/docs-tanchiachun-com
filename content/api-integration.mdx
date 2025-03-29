@@ -1,0 +1,85 @@
+---
+title: "API Integration"
+description: "Understanding API integration in React using fetch API and Axios."
+tags: ["api", "react", "fetch", "axios"]
+---
+
+## How to Integrate APIs in React
+
+APIs can be integrated into React applications using JavaScript’s built-in **fetch API** or third-party libraries like **Axios**. API calls are typically made inside lifecycle methods (in class components) or using the `useEffect` hook (in functional components).
+
+### Example: Fetch API in React
+```jsx
+import { useEffect, useState } from "react";
+
+function App() {
+  const [data, setData] = useState(null);
+  
+  useEffect(() => {
+    fetch("https://api.example.com/data")
+      .then((response) => response.json())
+      .then((json) => setData(json))
+      .catch((error) => console.error("Error fetching data:", error));
+  }, []);
+
+  return <div>{data ? JSON.stringify(data) : "Loading..."}</div>;
+}
+```
+
+### Example: Axios in React
+```jsx
+import { useEffect, useState } from "react";
+import axios from "axios";
+
+function App() {
+  const [data, setData] = useState(null);
+  
+  useEffect(() => {
+    axios.get("https://api.example.com/data")
+      .then((response) => setData(response.data))
+      .catch((error) => console.error("Error fetching data:", error));
+  }, []);
+
+  return <div>{data ? JSON.stringify(data) : "Loading..."}</div>;
+}
+```
+
+---
+
+## Fetch API vs. Axios
+
+### Advantages of Fetch API
+- **Built-in**: Available in modern browsers without extra dependencies.
+- **Promise-based**: Uses Promises for handling asynchronous operations.
+- **Streaming Support**: Supports streaming responses for handling large datasets efficiently.
+
+### Disadvantages of Fetch API
+- **Boilerplate Code**: Requires extra handling for JSON parsing and error responses.
+- **No Automatic JSON Parsing**: Must manually call `.json()` to extract data.
+- **No Rejection for HTTP Errors**: Fetch does not reject non-2xx responses, requiring manual error handling.
+- **Cross-Origin Requests**: May require additional headers or server-side configuration.
+
+### Advantages of Axios
+- **Concise and Readable Syntax**: Simplifies HTTP requests.
+- **Automatic JSON Parsing**: Reduces boilerplate code.
+- **Cancellation Support**: Can cancel pending requests to avoid memory leaks.
+- **Built-in Error Handling**: Automatically rejects non-2xx responses.
+- **Flexible**: Works in both browser and Node.js environments.
+
+### Disadvantages of Axios
+- **Additional Dependency**: Requires installation and maintenance of an external package.
+- **Cross-Origin Requests**: Still requires proper CORS handling like fetch API.
+
+---
+
+## When to Choose Fetch or Axios?
+| **Scenario** | **Use Fetch** | **Use Axios** |
+|-------------|--------------|-------------|
+| Small projects | ✅ | ❌ |
+| Minimize dependencies | ✅ | ❌ |
+| Automatic JSON parsing | ❌ | ✅ |
+| Cancellation support | ❌ | ✅ |
+| Error handling for non-2xx responses | ❌ | ✅ |
+| Works in Node.js & browser | ❌ | ✅ |
+
+For small projects with simple API requests, **fetch** is a good choice. For larger applications requiring enhanced features like **automatic JSON parsing, cancellation, and better error handling**, **Axios** is the preferred option.
