@@ -1,0 +1,52 @@
+---
+title: "Shallow and Deep Comparison"
+description: "Understanding the difference between shallow and deep comparisons in JavaScript with examples."
+tags: ["javascript", "comparison", "shallow", "deep"]
+---
+
+## What is Shallow Comparison?
+Shallow comparison checks whether two variables reference the same memory location rather than their actual content.
+
+### Example: Shallow Comparison
+```javascript
+const obj1 = { name: "Alice" };
+const obj2 = { name: "Alice" };
+console.log(obj1 === obj2); // false (different memory references)
+```
+In this case, `obj1` and `obj2` have identical properties, but since they are stored in different locations in memory, the comparison returns `false`.
+
+---
+
+## What is Deep Comparison?
+Deep comparison checks whether two objects or arrays contain the same values, including nested structures.
+
+### Example: Deep Comparison
+```javascript
+function deepEqual(objA, objB) {
+  return JSON.stringify(objA) === JSON.stringify(objB);
+}
+
+const obj1 = { name: "Alice" };
+const obj2 = { name: "Alice" };
+console.log(deepEqual(obj1, obj2)); // true
+```
+Here, we compare the stringified versions of both objects, which checks their actual content rather than memory reference.
+
+---
+
+## Differences Between Shallow and Deep Comparison
+| Feature           | Shallow Comparison        | Deep Comparison        |
+|------------------|-------------------------|------------------------|
+| **Checks**       | Memory reference         | Actual content         |
+| **Performance**  | Faster                   | Slower                 |
+| **Use case**     | Checking if objects are the same instance | Ensuring all values inside objects or arrays match |
+
+---
+
+## When to Use Which?
+- Use **shallow comparison** when you only need to check if two variables refer to the same object.
+- Use **deep comparison** when verifying if objects or arrays have identical values, including nested properties.
+
+---
+
+By understanding these concepts, you can choose the appropriate comparison method based on your JavaScript use case.

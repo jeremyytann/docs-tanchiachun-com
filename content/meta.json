@@ -15,6 +15,7 @@
     "higher-order-functions",
     "mutable-and-immutable-objects",
     "promisify-with-recursion",
+    "shallow-and-deep-comparison",
     "web-workers-vs-service-workers",
     "---Next.js---",
     "guide-to-firebase-hosting",
