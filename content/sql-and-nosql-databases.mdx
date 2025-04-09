@@ -1,0 +1,63 @@
+---
+title: "SQL and NoSQL Databases"
+description: "Understanding the key differences, advantages, and use cases of SQL and NoSQL databases."
+tags: ["SQL", "NoSQL", "Database", "RDBMS", "Data Modeling"]
+---
+
+## What is an SQL Database?
+
+An **SQL (Structured Query Language) database** is a type of **relational database management system (RDBMS)** that organizes data into structured **tables with rows and columns**. It uses SQL as the standard language for **querying and managing data**.
+
+### Key Features of SQL Database
+- Strong adherence to **ACID (Atomicity, Consistency, Isolation, Durability)** properties.
+- Supports **complex queries**, joins, and transactions.
+- Enforces **structured schema** to maintain data integrity.
+
+**Popular SQL Databases:** MySQL, PostgreSQL, SQLite, Microsoft SQL Server, Oracle
+
+---
+
+## What is a NoSQL Database?
+
+A **NoSQL database** is a **non-relational database** that offers a more flexible, schema-less data model. It is designed for handling **unstructured or semi-structured data**, often providing high scalability and availability.
+
+### Types of NoSQL Databases
+- **Document-oriented** (e.g., MongoDB)
+- **Key-value** stores (e.g., Redis)
+- **Wide-column** stores (e.g., Cassandra)
+- **Graph** databases (e.g., Neo4j)
+
+### Key Features of NoSQL Database
+- Schema-less or **dynamic schema**
+- Optimized for **horizontal scaling**
+- Typically supports **eventual consistency** over strict ACID compliance
+
+---
+
+## Differences Between SQL and NoSQL
+
+| Feature        | SQL Database                   | NoSQL Database                            |
+|----------------|--------------------------------|-------------------------------------------|
+| **Data Model** | Structured tables (rows/cols) | Flexible (JSON, key-value, graphs, etc.)  |
+| **Schema**     | Predefined, fixed              | Dynamic, flexible                         |
+| **Scaling**    | Vertical (scale-up)            | Horizontal (scale-out)                    |
+| **Consistency**| Strong ACID compliance         | Eventual consistency (usually)            |
+
+---
+
+## When to Choose SQL vs NoSQL
+
+### Choose **SQL** when:
+- You have **structured data** with clear relationships.
+- You need **complex queries and transactions**.
+- You prioritize **data integrity and consistency**.
+
+### Choose **NoSQL** when:
+- You deal with **large volumes of unstructured or semi-structured data**.
+- You need **flexibility** in your data model.
+- You aim for **high scalability and availability**.
+- Your app requires **fast performance** with relaxed consistency.
+
+---
+
+Both SQL and NoSQL have their strengths and are suited for different types of applications. The choice depends on your project requirements, including the structure of your data, scale, performance needs, and consistency expectations.

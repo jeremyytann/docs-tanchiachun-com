@@ -3,6 +3,8 @@
   "pages": [
     "---Introduction---",
     "index",
+    "---Database---",
+    "sql-and-nosql-databases",
     "---DevOps---",
     "deployment-strategies",
     "---Frontend---",
