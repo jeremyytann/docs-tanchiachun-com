@@ -1,0 +1,176 @@
+---
+title: CORS
+description: Learn about CORS, its importance, and different ways to handle CORS in web applications.
+tags: ["backend", "http", "web security", "CORS"]
+---
+
+## What is CORS?
+
+**CORS** stands for **Cross-Origin Resource Sharing**. It is a **security feature implemented by web browsers** that restricts web applications running on one domain from making requests to another domain. This restriction, called the **same-origin policy**, is crucial for protecting users from malicious websites.
+
+When a web application tries to make a **cross-origin request** (e.g., from `https://example.com` to `https://api.example.org`), the browser blocks it unless the target server explicitly allows it.
+
+---
+
+## Why is CORS Important?
+
+CORS is important because it:
+
+- Prevents **unauthorized access** to sensitive data.
+- Blocks **malicious cross-site requests**.
+- Helps enforce **security boundaries** between different origins.
+
+---
+
+## Common Use Cases for CORS
+
+- **Third-party APIs**: Web applications fetching data from external APIs (e.g., weather, maps, payment gateways).
+- **Frontend-backend separation**: React/Vue frontend apps making requests to a backend server hosted on a different domain or port (e.g., `localhost:3000` to `localhost:5000`).
+- **CDN and microservices**: Applications loading assets or data from a Content Delivery Network (CDN) or different microservice endpoints.
+
+---
+
+## Common CORS Errors
+
+1. **No 'Access-Control-Allow-Origin' header present**
+   - The server didn't respond with a proper CORS header.
+2. **CORS preflight channel did not succeed**
+   - The server didn't respond correctly to the preflight (OPTIONS) request.
+3. **Blocked by CORS policy**
+   - A general error indicating that the request was blocked due to CORS violations.
+
+---
+
+## Methods to Solve CORS
+
+### 1. CORS Headers (Server-Side Configuration)
+The most common method is to configure the **server** to send proper CORS headers in its response.
+
+**Example (Node.js/Express):**
+```js
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*"); // or specific origin
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  next();
+});
+```
+
+### 2. Using a Proxy Server
+Use a **proxy server** or middleware to bypass the CORS restriction.
+
+**Example (React Dev Server):**
+```json
+// package.json
+"proxy": "http://localhost:5000"
+```
+
+### 3. CORS Preflight Request
+Browsers send an `OPTIONS` request before sending requests with non-simple methods/headers.
+
+**Example (Express):**
+```js
+app.options('*', (req, res) => {
+  res.header("Access-Control-Allow-Origin", "*"); // or specific origin
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.sendStatus(204);
+});
+```
+
+### 4. JSONP (Legacy, GET-only)
+JSONP bypasses CORS by using `<script>` tags. Useful only for legacy `GET` APIs.
+
+<Callout type="warn">
+  Not recommended for modern applications due to security risks and limited support.
+</Callout>
+
+### 5. Browser Extensions / Development Bypass
+Extensions like **Allow CORS** can temporarily disable CORS checks for development.
+
+<Callout type="warn">
+  Not safe for production use!
+</Callout>
+
+### 6. CORS with Credentials
+If your app sends cookies or auth headers, both client and server must allow credentials.
+
+**Example (Frontend):**
+```js
+fetch('https://api.example.com/data', {
+  method: 'GET',
+  credentials: 'include'
+});
+```
+
+**Example (Backend):**
+```js
+res.header("Access-Control-Allow-Origin", "https://your-frontend.com");
+res.header("Access-Control-Allow-Credentials", "true");
+```
+
+### 7. Edge/Cloud-Based CORS Handling
+Services like **Cloudflare Workers**, **API Gateways (AWS, GCP)**, or **Vercel Middleware** can handle CORS at the edge layer.
+
+---
+
+## Security Considerations
+
+- Avoid using `Access-Control-Allow-Origin: *` for private APIs.
+- Always restrict allowed origins to trusted domains.
+- Validate and sanitize incoming requests even if they pass CORS checks.
+
+---
+
+## Tools and Techniques for Debugging CORS Issues
+
+1. **Browser DevTools → Network tab**
+   - Check request/response headers and inspect CORS-related errors.
+2. **Postman or curl**
+   - Helps isolate if the issue is truly CORS-related or a backend misconfiguration.
+3. **Middleware libraries**
+   - Express: `cors` npm package  
+    ```js
+    const cors = require('cors');
+    app.use(cors({ origin: 'https://your-frontend.com' }));
+    ```
+
+---
+
+## Example: CORS in Express.js
+
+```js
+const express = require('express');
+const cors = require('cors');
+const app = express();
+
+const corsOptions = {
+  origin: ['https://your-frontend.com'],
+  methods: ['GET', 'POST'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+};
+
+app.use(cors(corsOptions));
+
+app.get('/api/data', (req, res) => {
+  res.json({ message: 'CORS-enabled response' });
+});
+```
+
+---
+
+## Summary
+
+| Method                  | Use Case |
+|-------------------------|----------|
+| CORS headers            | Most common and reliable method |
+| Proxy server            | Great for development |
+| Preflight request       | Required for non-simple requests |
+| JSONP                   | Legacy systems only |
+| Browser extensions      | Dev-only workaround |
+| Credentials handling    | For apps with sessions/auth |
+| Cloud-based handling    | Useful for serverless APIs |
+
+---
+
+CORS can be tricky at first, but with the right configuration, you can safely and securely enable cross-origin communication in your apps!

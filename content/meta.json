@@ -3,6 +3,8 @@
   "pages": [
     "---Introduction---",
     "index",
+    "---Backend---",
+    "cors",
     "---Database---",
     "sql-and-nosql-databases",
     "---DevOps---",
