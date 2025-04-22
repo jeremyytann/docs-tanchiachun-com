@@ -3,8 +3,6 @@
   "pages": [
     "---Introduction---",
     "index",
-    "---Backend---",
-    "cors",
     "---Database---",
     "sql-and-nosql-databases",
     "---DevOps---",
@@ -21,6 +19,9 @@
     "promisify-with-recursion",
     "shallow-and-deep-comparison",
     "web-workers-vs-service-workers",
+    "---Networking---",
+    "cors",
+    "http-responses",
     "---Next.js---",
     "guide-to-firebase-hosting",
     "ssr-vs-csr",

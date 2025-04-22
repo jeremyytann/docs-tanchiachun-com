@@ -1,0 +1,182 @@
+---
+title: "HTTP Responses" 
+description: "Dive into the structure of HTTP responses, learn what status codes mean, and understand how headers and body work together in client-server communication."
+tags: ["HTTP", "Web Development", "API", "Networking", "HTTP Status Codes"]
+---
+
+## What is an HTTP Response?
+
+An **HTTP response** is the message sent by a server back to a client (usually a browser or mobile app) after receiving an HTTP request. It includes important information about the result of the request — whether it succeeded, failed, or needs further action.
+
+Understanding HTTP responses is crucial for debugging issues, building reliable APIs, and optimizing web performance.
+
+---
+
+## Structure of an HTTP Response
+
+An HTTP response typically consists of three main parts:
+
+### 1. **Status Line**
+
+Indicates the outcome of the request.
+
+**Example:**
+
+```http
+HTTP/1.1 200 OK
+```
+
+- `HTTP/1.1`: The HTTP version.
+- `200`: The status code.
+- `OK`: The status message.
+
+### 2. **Headers**
+
+Metadata about the response.
+
+**Examples:**
+
+```http
+Content-Type: application/json
+Content-Length: 512
+Cache-Control: no-cache
+```
+
+Headers provide information like content type, cache policies, server info, cookies, and more.
+
+### 3. **Body**
+
+The actual data returned from the server.
+
+**Example (JSON response):**
+
+```json
+{
+  "id": 1,
+  "name": "Jeremy",
+  "role": "Developer"
+}
+```
+
+The body is optional and depends on the request type and status.
+
+---
+
+## Common HTTP Status Codes
+
+HTTP status codes are grouped into five classes:
+
+### 1xx: Informational
+
+- `100 Continue` – Indicates that the initial part of the request has been received.
+- `101 Switching Protocols` – The server is switching to a different protocol.
+- `102 Processing` *(WebDAV)* – The server has received and is processing the request.
+- `103 Early Hints` – Preload resources while waiting for the final response.
+
+### 2xx: Success
+
+- `200 OK` – Standard response for a successful HTTP request.
+- `201 Created` – A resource was successfully created.
+- `202 Accepted` – The request was accepted but not yet processed.
+- `203 Non-Authoritative Information` – Metadata returned from a third-party.
+- `204 No Content` – The request was successful but returns no content.
+- `205 Reset Content` – Tells the client to reset the document view.
+- `206 Partial Content` – Partial GET request succeeded.
+- `207 Multi-Status` *(WebDAV)* – Multiple status codes returned for multiple operations.
+
+### 3xx: Redirection
+
+- `300 Multiple Choices` – Multiple options for the resource.
+- `301 Moved Permanently` – This resource has been permanently moved.
+- `302 Found` – Resource temporarily moved.
+- `303 See Other` – See another URI with GET.
+- `304 Not Modified` – Cached version is still valid.
+- `305 Use Proxy` – Must access through proxy (deprecated).
+- `307 Temporary Redirect` – Temporarily redirected; method preserved.
+- `308 Permanent Redirect` – Permanently redirected; method preserved.
+
+### 4xx: Client Errors
+
+- `400 Bad Request` – The request was malformed.
+- `401 Unauthorized` – Authentication is required.
+- `402 Payment Required` – Reserved for future use.
+- `403 Forbidden` – You don’t have permission.
+- `404 Not Found` – Resource not found.
+- `405 Method Not Allowed` – HTTP method not allowed.
+- `406 Not Acceptable` – Cannot respond with acceptable content.
+- `407 Proxy Authentication Required` – Proxy authentication needed.
+- `408 Request Timeout` – Client took too long to send request.
+- `409 Conflict` – Request conflicts with current server state.
+- `410 Gone` – Resource is permanently gone.
+- `411 Length Required` – Content-Length header required.
+- `412 Precondition Failed` – Conditions in headers not met.
+- `413 Payload Too Large` – Request body too large.
+- `414 URI Too Long` – URI is too long for the server.
+- `415 Unsupported Media Type` – Media type not supported.
+- `416 Range Not Satisfiable` – Requested range not available.
+- `417 Expectation Failed` – Expect header failed.
+- `418 I'm a teapot` – April Fools' joke RFC.
+- `422 Unprocessable Entity` – Syntax is correct, but semantics are wrong.
+- `429 Too Many Requests` – Rate limiting exceeded.
+
+### 5xx: Server Errors
+
+- `500 Internal Server Error` – A generic server error.
+- `501 Not Implemented` – Feature not implemented.
+- `502 Bad Gateway` – Invalid response from upstream server.
+- `503 Service Unavailable` – Server is down or overloaded.
+- `504 Gateway Timeout` – Upstream server timeout.
+- `505 HTTP Version Not Supported` – HTTP version not supported.
+- `507 Insufficient Storage` – Not enough storage space.
+- `508 Loop Detected` – Infinite loop detected (WebDAV).
+- `510 Not Extended` – Further extensions are required.
+- `511 Network Authentication Required` – Network login required.
+
+---
+
+## What is WebDAV?
+
+**WebDAV** (Web Distributed Authoring and Versioning) is an extension of the HTTP protocol that allows clients to perform remote web content authoring operations. It enables features like:
+
+- Creating, editing, and deleting files on a remote server
+- Managing document properties (like author, creation date)
+- Locking resources to prevent overwrites during editing
+- Handling collections (e.g., folders and directories)
+
+Many HTTP status codes like `102`, `207`, `422`, `507`, and `508` were introduced specifically to support WebDAV operations. It's commonly used in collaborative tools, CMS systems, and networked file management systems.
+
+---
+
+## Example: HTTP Response
+
+```http
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 86
+Connection: keep-alive
+
+{
+  "message": "Welcome back!",
+  "user": {
+    "id": 42,
+    "name": "Jeremy"
+  }
+}
+```
+
+---
+
+## Why Understanding HTTP Responses Matters
+
+- **Debugging**: Interpreting status codes helps pinpoint where things go wrong.
+- **Security**: Proper use of 401/403/429 can improve API security.
+- **Performance**: Effective use of 304 or 204 can enhance client efficiency.
+- **API Design**: Clear, consistent responses improve developer experience.
+
+---
+
+## Final Thoughts
+
+HTTP responses are at the heart of every client-server interaction on the web. Whether you're building REST APIs, working with frontends, or debugging network issues, a solid grasp of status codes and response structures will save you time — and many headaches.
+
+Whenever in doubt, remember: **what the server says back matters just as much as what the client asks for**.
