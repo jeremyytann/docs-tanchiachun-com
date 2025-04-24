@@ -1,0 +1,126 @@
+---
+title: "HTTP Methods"
+description: "Understand the different HTTP request methods, their purposes, and how they are used in modern web development and API design."
+tags: ["HTTP", "Web Development", "API", "Networking", "HTTP Methods"]
+---
+
+## What are HTTP Methods?
+
+HTTP methods, also known as HTTP verbs, define the type of action a client wants to perform on a server resource. Each method maps to a specific operation in CRUD (Create, Read, Update, Delete), forming the foundation of RESTful APIs.
+
+These methods are standardized in the HTTP protocol and are essential for client-server communication.
+
+---
+
+## Common HTTP Methods
+
+### **GET**
+- **Purpose:** Retrieve data from the server.
+- **Safe:** Yes
+- **Idempotent:** Yes
+- **Example:** Fetch a user's profile
+```http
+GET /users/1 HTTP/1.1
+```
+
+### **POST**
+- **Purpose:** Send data to the server to create a new resource.
+- **Safe:** No
+- **Idempotent:** No
+- **Example:** Registering a new user
+```http
+POST /users HTTP/1.1
+Content-Type: application/json
+
+{
+  "name": "Jeremy",
+  "email": "jeremy@example.com"
+}
+```
+
+### **PUT**
+- **Purpose:** Update a resource by replacing it entirely.
+- **Safe:** No
+- **Idempotent:** Yes
+- **Example:** Update user details
+```http
+PUT /users/1 HTTP/1.1
+Content-Type: application/json
+
+{
+  "name": "Jeremy",
+  "email": "newjeremy@example.com"
+}
+```
+
+### **PATCH**
+- **Purpose:** Update part of a resource.
+- **Safe:** No
+- **Idempotent:** Not guaranteed
+- **Example:** Change only the email field
+```http
+PATCH /users/1 HTTP/1.1
+Content-Type: application/json
+
+{
+  "email": "patched@example.com"
+}
+```
+
+### **DELETE**
+- **Purpose:** Remove a resource from the server.
+- **Safe:** No
+- **Idempotent:** Yes
+- **Example:** Delete a user
+```http
+DELETE /users/1 HTTP/1.1
+```
+
+---
+
+## Less Common HTTP Methods
+
+### **HEAD**
+- Like `GET` but returns only headers (no body).
+- Useful for checking if a resource exists or to retrieve metadata.
+
+### **OPTIONS**
+- Returns the allowed HTTP methods on a resource.
+- Commonly used in CORS preflight requests.
+
+### **CONNECT**
+- Used to establish a network connection.
+- Often for tunneling HTTPS traffic through proxies.
+
+### **TRACE**
+- Echoes the request for diagnostic purposes. 
+- Rarely used and often disabled for security reasons.
+
+---
+
+## Safe and Idempotent Methods Explained
+
+- **Safe**: A method is considered *safe* if it doesn't modify the server state. (`GET`, `HEAD`)
+- **Idempotent**: An *idempotent* method can be called multiple times without changing the result. (`GET`, `PUT`, `DELETE`, `HEAD`, `OPTIONS`)
+
+---
+
+## Choosing the Right HTTP Method
+
+When building RESTful APIs or working with web services, selecting the correct method improves clarity, security, and caching behavior.
+
+| Method | Use for | Safe | Idempotent |
+|--------|---------|------|------------|
+| GET    | Reading data | ✅ | ✅ |
+| POST   | Creating data | ❌ | ❌ |
+| PUT    | Replacing data | ❌ | ✅ |
+| PATCH  | Updating data | ❌ | ❌ |
+| DELETE | Deleting data | ❌ | ✅ |
+| HEAD   | Metadata fetch | ✅ | ✅ |
+| OPTIONS| Method check | ✅ | ✅ |
+
+---
+
+## Final Thoughts
+
+HTTP methods are the backbone of modern web and API communication. Using them correctly ensures your applications are robust, predictable, and standards-compliant. Whether you're debugging requests or designing a REST API, a deep understanding of these verbs is a must-have tool in your developer toolkit.
