@@ -1,0 +1,146 @@
+---
+title: "Object-Oriented Programming (OOP)"
+description: "Learn the core concepts of Object-Oriented Programming (OOP), its principles, and why it's a foundational skill in modern software development."
+tags: ["OOP", "Programming", "Software Development", "Object-Oriented Programming"]
+---
+
+## What is Object-Oriented Programming (OOP)?
+
+**Object-Oriented Programming (OOP)** is a programming paradigm based on the concept of "objects," which can contain data (fields or properties) and code (methods or functions).
+
+Instead of writing procedures and functions that operate on data, OOP organizes software design around data, or objects, and a set of well-defined interfaces to that data.
+
+OOP is widely used because it promotes modularity, code reuse, scalability, and a clearer structure, especially for complex programs.
+
+---
+
+## Key Concepts of OOP
+
+### 1. **Class**
+
+A **class** is a blueprint for creating objects. It defines properties (attributes) and behaviors (methods) that its objects will have.
+
+```javascript
+class Animal {
+  constructor(name) {
+    this.name = name;
+  }
+
+  speak() {
+    console.log(`${this.name} makes a sound.`);
+  }
+}
+```
+
+### 2. **Object**
+
+An **object** is an instance of a class.
+
+```javascript
+const dog = new Animal("Buddy");
+dog.speak(); // Buddy makes a sound.
+```
+
+### 3. **Inheritance**
+
+Inheritance allows a class to inherit properties and methods from another class.
+
+```javascript
+class Dog extends Animal {
+  speak() {
+    console.log(`${this.name} barks.`);
+  }
+}
+
+const pet = new Dog("Max");
+pet.speak(); // Max barks.
+```
+
+### 4. **Polymorphism**
+
+Polymorphism allows objects of different classes to be treated as objects of a common superclass.
+
+```javascript
+function animalSpeak(animal) {
+  animal.speak();
+}
+
+const cat = new Animal("Whiskers");
+const doggo = new Dog("Bolt");
+
+animalSpeak(cat); // Whiskers makes a sound.
+animalSpeak(doggo); // Bolt barks.
+```
+
+### 5. **Encapsulation**
+
+Encapsulation restricts direct access to some of an object's components, which can protect the internal state of the object.
+
+```javascript
+class Person {
+  #age; // private property
+
+  constructor(name, age) {
+    this.name = name;
+    this.#age = age;
+  }
+
+  getAge() {
+    return this.#age;
+  }
+}
+
+const john = new Person("John", 30);
+console.log(john.getAge()); // 30
+```
+
+### 6. **Abstraction**
+
+Abstraction hides complex implementation details and shows only the necessary features of an object.
+
+```javascript
+class Car {
+  constructor(make) {
+    this.make = make;
+    this.engineStarted = false;
+  }
+
+  startCar() {
+    this.#startEngine();
+    console.log(`${this.make} is ready to go!`);
+  }
+
+  // Private method (internal details hidden)
+  #startEngine() {
+    console.log("Starting the engine...");
+    this.engineStarted = true;
+  }
+}
+
+// Usage
+const myCar = new Car("Toyota");
+myCar.startCar();
+
+// myCar.#startEngine(); ❌ Error! (cannot access private method)
+```
+
+In JavaScript, this is often done via interfaces (in TypeScript) or through design patterns.
+
+---
+
+## Why Use OOP?
+
+- **Modularity**: Code is organized into discrete objects.
+- **Reusability**: Once a behavior is defined in a class, it can be reused across projects.
+- **Scalability**: Easier to manage growing codebases.
+- **Maintainability**: Easier to debug, enhance, and refactor.
+
+---
+
+## Final Thoughts
+
+OOP is not just a way of coding — it's a way of thinking about software.
+Understanding OOP can help you build more organized, efficient, and powerful applications.
+
+Remember: **Think in terms of real-world objects and their interactions.** Once you grasp that mindset, OOP will feel natural!
+
