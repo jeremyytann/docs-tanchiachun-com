@@ -1,0 +1,113 @@
+---
+title: "Memoization"
+description: "Learn what memoization is, how it optimizes performance in React, and how to use React.memo, useMemo, and useCallback effectively."
+tags: ["React", "Performance", "Memoization", "React.memo", "useMemo", "useCallback"]
+---
+
+## What is Memoization?
+
+Memoization is a performance optimization technique that **caches the results** of expensive function calls. If the inputs don't change, memoization returns the previously stored result instead of recalculating it.
+
+In React, memoization is crucial for preventing unnecessary re-renders, especially in large applications.
+
+---
+
+## Why is Memoization Important in React?
+
+React components re-render when props or state change. Sometimes, these renders are unnecessary and can hurt performance — especially when:
+
+- Components render large lists.
+- Expensive calculations are repeated.
+- Functions or props change frequently, triggering children to re-render.
+
+Memoization helps solve these issues by:
+
+- Skipping re-renders when inputs haven't changed.
+- Caching computed values.
+- Preventing unnecessary function recreation.
+
+---
+
+## React.memo
+
+`React.memo` is a **Higher Order Component** that memoizes a **functional component**.
+
+### Use React.memo when:
+- Your component **renders the same output** given the same props.
+
+### Example: Using React.memo
+
+```jsx
+const Greeting = React.memo(({ name }) => {
+  console.log("Greeting rendered");
+  return <h1>Hello, {name}!</h1>;
+});
+
+// Only re-renders if `name` changes.
+```
+
+---
+
+## 2. useMemo
+
+`useMemo` memoizes **a computed value**, and only recalculates it when its dependencies change.
+
+### Use useMemo when:
+- You have **expensive computations** inside a component.
+
+### Example: Using useMemo
+
+```jsx
+const ExpensiveComponent = ({ num }) => {
+  const squared = useMemo(() => {
+    console.log("Calculating square");
+    return num * num;
+  }, [num]);
+
+  return <div>Square: {squared}</div>;
+};
+```
+
+---
+
+## 3. useCallback
+
+`useCallback` memoizes **a function**, and only recreates it when its dependencies change.
+
+### Use useCallback when:
+- You're passing **callbacks to child components**.
+- You want to **prevent child re-renders** due to new function references.
+
+### Example: Using useCallback
+
+```jsx
+const Parent = () => {
+  const [count, setCount] = useState(0);
+
+  const handleClick = useCallback(() => {
+    setCount((c) => c + 1);
+  }, []);
+
+  return <Child onClick={handleClick} />;
+};
+```
+
+---
+
+## Memoization Best Practices
+
+- Avoid premature optimization — **measure performance first**.
+- Don’t overuse `useMemo` or `useCallback` — they add complexity.
+- Use memoization when:
+  - Computations are expensive.
+  - Props/functions cause unnecessary re-renders.
+- Wrap components with `React.memo` when their props are stable.
+
+---
+
+## Final Thoughts
+
+Memoization can dramatically improve performance in React apps when used wisely. Mastering `React.memo`, `useMemo`, and `useCallback` helps you write faster, smarter components.
+
+Remember: **If it’s not slow, don’t memoize!**
+
