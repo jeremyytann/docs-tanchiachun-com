@@ -23,6 +23,7 @@
     "cors",
     "http-methods",
     "http-responses",
+    "jsonp",
     "---Next.js---",
     "guide-to-firebase-hosting",
     "ssr-vs-csr",

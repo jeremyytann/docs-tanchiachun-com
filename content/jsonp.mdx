@@ -1,0 +1,84 @@
+---
+title: "JSONP"
+description: "Learn what JSONP is, why it was created, how it enables cross-domain requests, and how to implement it with real code examples."
+tags: ["JSONP", "CORS", "Cross-Origin", "Web Development", "JavaScript"]
+---
+
+## What is JSONP?
+
+**JSONP** stands for **JSON with Padding**. It's a technique used to make cross-origin requests from the browser — before **CORS** (Cross-Origin Resource Sharing) became the standard.
+
+Normally, browsers block AJAX requests to a different domain due to the **same-origin policy**. But `<script>` tags are an exception. JSONP takes advantage of this by requesting a script from a remote server that returns JavaScript code — usually a function call with data passed in.
+
+---
+
+## How Does JSONP Work?
+
+With JSONP, you don't fetch JSON directly. Instead, you define a **callback function**, and the server wraps the JSON data in a call to that function.
+
+### Example: Client code
+
+```html
+<script>
+  function handleData(data) {
+    console.log("Received:", data);
+  }
+
+  // Create a script tag to fetch JSONP data
+  const script = document.createElement('script');
+  script.src = 'https://example.com/data?callback=handleData';
+  document.body.appendChild(script);
+</script>
+```
+
+### Example: Server response
+
+```js
+handleData({
+  id: 1,
+  name: "Jeremy",
+  role: "Developer"
+});
+```
+
+The browser will interpret this as JavaScript, and call the `handleData` function with the data object.
+
+---
+
+## Key Characteristics of JSONP
+
+- Works only with GET requests.
+- Cannot send POST, PUT, DELETE, or include custom headers.
+- No control over response errors (you can't **catch** a 404).
+- Useful for legacy systems or APIs that only support JSONP.
+
+---
+
+## When (and When Not) to Use JSONP
+
+### Use JSONP:
+- When working with older APIs that expose data via JSONP.
+- When CORS headers are not available and GET requests are sufficient.
+
+### Avoid JSONP:
+- In modern apps where CORS is supported — it’s more secure and flexible.
+- When dealing with sensitive data. JSONP can be vulnerable to **XSS** attacks if not properly sanitized.
+
+---
+
+## JSONP vs. CORS
+
+| Feature              | JSONP                        | CORS                                |
+|----------------------|------------------------------|--------------------------------------|
+| Browser support      | Legacy and modern            | Modern browsers                      |
+| Request method       | Only GET                     | GET, POST, PUT, DELETE, etc.         |
+| Error handling       | None                         | Full support (status codes, catch)   |
+| Security             | Less secure (XSS risk)       | Safer with proper configuration      |
+| Complexity           | Simple setup, limited        | Requires server-side config          |
+
+---
+
+## Final Thoughts
+
+JSONP was a clever workaround for the browser's same-origin policy before CORS existed. While it's mostly outdated now, it’s helpful to understand for legacy compatibility and historical context. If you're building new APIs or apps, always prefer CORS for better security, flexibility, and error handling.
+
