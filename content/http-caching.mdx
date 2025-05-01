@@ -1,0 +1,133 @@
+---
+title: "HTTP Caching"
+description: "Learn how HTTP caching improves web performance, the types of caches, and how cache headers control behavior."
+tags: ["HTTP", "Caching", "Performance", "Web Development", "Headers"]
+---
+
+## What is HTTP Caching?
+
+**HTTP caching** is a mechanism that allows web browsers and intermediary servers (like CDNs or proxies) to store copies of responses to reduce server load, speed up response times, and improve user experience.
+
+Instead of fetching the same resources every time from the server, cached responses can be reused when appropriate — leading to faster websites and less redundant network traffic.
+
+---
+
+## Why is Caching Important?
+
+- **Performance:** Reduces load times for repeat visits.
+- **Server Load:** Decreases number of duplicate requests to the server.
+- **Bandwidth Savings:** Less data transfer between client and server.
+- **Scalability:** Helps your application handle more users efficiently.
+
+---
+
+## Types of HTTP Caches
+
+### Browser Cache
+Stored locally by the user’s browser. Ideal for static assets like CSS, JS, and images.
+
+When a user revisits a webpage, the browser checks its cache to see if it already has a copy of the requested resource. If the resource is found in the cache and is still valid according to its cache control directives, the browser can serve it directly without making a network request.
+
+### Proxy Cache / CDN
+Intermediaries (like Cloudflare, Akamai) cache content close to the user.
+
+When a request is made to a server through a proxy, the proxy first checks its cache to see if it has a valid copy of the requested resource. If found, the proxy can serve the cached copy directly to the client, reducing the load on the origin server and improving response times.
+
+### Gateway Cache / Reverse Proxy
+Used by servers (like Varnish or Nginx) to cache dynamic content.
+
+When a user requests a dynamic page (e.g. `/dashboard`), the reverse proxy (e.g. Nginx or Varnish) checks if it has a recently cached version. If it does, it serves the cached page immediately — bypassing the backend server logic (e.g. database calls, rendering engines). This reduces latency and server load while still delivering dynamic-looking content quickly.
+
+---
+
+## HTTP Headers that Control Caching
+
+### Cache-Control
+The most modern and flexible directive.
+
+```http
+Cache-Control: public, max-age=86400
+```
+
+**Common directives:**
+- `public` : Indicates that the response can be cached by any cache (browser, CDN, etc).
+- `private` : Only the end user’s browser should cache the response (not shared caches).
+- `max-age=<seconds>` : Specifies how long the resource is considered fresh.
+- `s-maxage=<seconds>` : Same as `max-age`, but only for shared caches like CDNs.
+- `no-cache` : Allows caching, but forces validation with the server before using it.
+- `no-store` : Prevents the resource from being cached at all.
+- `must-revalidate` : Forces the cache to revalidate the resource after it becomes stale.
+- `proxy-revalidate` : Like `must-revalidate`, but specifically for shared (proxy) caches.
+- `immutable` : Indicates that the resource won’t change, so clients can reuse it forever.
+
+### Expires
+A legacy header that sets a specific expiry date/time.
+
+```http
+Expires: Wed, 01 May 2025 12:00:00 GMT
+```
+
+### ETag
+Used to determine if content has changed using a unique hash.
+
+```http
+ETag: "abc123"
+```
+
+**Example:** Client sends
+```http
+If-None-Match: "abc123"
+```
+
+**Example:** The server responds (if unchanged)
+```http
+304 Not Modified
+```
+
+### Last-Modified
+Similar to `ETag`, but based on timestamp.
+
+```http
+Last-Modified: Tue, 28 Apr 2025 10:00:00 GMT
+```
+
+**Example:** Client sends
+```http
+If-Modified-Since: Tue, 28 Apr 2025 10:00:00 GMT
+```
+
+**Example:** The server responds (if unchanged)
+```http
+304 Not Modified
+```
+
+---
+
+## Caching Strategies
+
+- **Cache-First**: Try cache before hitting the network.
+- **Network-First**: Always fetch, but fall back to cache if offline.
+- **Stale-While-Revalidate**: Serve from cache and update in background.
+
+---
+
+## Real-World Example
+
+**Example:** Used for static assets like JS or images that rarely change
+
+```http
+Cache-Control: public, max-age=31536000, immutable
+```
+
+**Example:** Used for sensitive or always-updated data (e.g. banking info)
+
+```http
+Cache-Control: no-store
+```
+
+---
+
+## Final Thoughts
+
+HTTP caching is one of the most powerful tools in web optimization. Understanding and properly configuring cache headers can drastically improve both performance and scalability. It’s essential knowledge for developers working on any production-grade application.
+

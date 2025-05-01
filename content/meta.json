@@ -21,6 +21,7 @@
     "web-workers-vs-service-workers",
     "---Networking---",
     "cors",
+    "http-caching",
     "http-methods",
     "http-responses",
     "jsonp",
