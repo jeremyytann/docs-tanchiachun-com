@@ -39,6 +39,7 @@
     "hooks",
     "memoization",
     "routers",
+    "state-management",
     "virtual-dom"
   ]
 }

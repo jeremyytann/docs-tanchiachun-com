@@ -1,0 +1,222 @@
+---
+title: "State Management"
+description: "Explore how React handles state, the challenges of lifting state, and when to use tools like Context API, Redux, or Zustand."
+tags: ["React", "State Management", "Redux", "Context API", "Zustand"]
+---
+
+## What is State in React?
+
+In React, **state** refers to data that determines a component’s behavior and what it renders. When the state changes, React re-renders the component to reflect the new data.
+
+**Example:**
+
+```jsx
+import { useState } from 'react';
+
+function Counter() {
+  const [count, setCount] = useState(0);
+
+  return (
+    <div>
+      <p>Count: {count}</p>
+      <button onClick={() => setCount(count + 1)}>Increment</button>
+    </div>
+  );
+}
+```
+
+---
+
+## Why State Management Matters
+
+As your app grows, managing state becomes more complex:
+
+* Components need to share data
+* You need to manage global settings or user authentication
+* Changes in one component affect others
+
+This is where **state management** patterns and libraries come into play.
+
+---
+
+## Lifting State Up
+
+When state is needed in multiple child components, you lift it to their common parent.
+
+```jsx
+function Parent() {
+  const [value, setValue] = useState('');
+
+  return (
+    <>
+      <Input value={value} onChange={setValue} />
+      <Display value={value} />
+    </>
+  );
+}
+```
+
+While effective for small cases, this quickly becomes hard to maintain in larger apps.
+
+---
+
+## Options for State Management in React
+
+### Context API
+
+The **Context API** is built into React and is best suited for **global state** that doesn’t change frequently — like theme, language preference, or authentication status.
+
+**How it works:**
+
+* You create a context using `createContext()`.
+* Wrap your component tree with a `Provider` and pass in the shared state.
+* Components access that state using `useContext()`.
+
+**Pros:**
+
+* Native to React (no extra dependencies).
+* Simple and declarative.
+
+**Cons:**
+
+* Not optimized for performance; unnecessary re-renders may occur.
+* Debugging nested providers or deeply consumed context can be tricky.
+
+```jsx
+const ThemeContext = createContext();
+
+function App() {
+  return (
+    <ThemeContext.Provider value={{ theme: 'dark' }}>
+      <Child />
+    </ThemeContext.Provider>
+  );
+}
+
+function Child() {
+  const { theme } = useContext(ThemeContext);
+  return <p>Theme: {theme}</p>;
+}
+```
+
+---
+
+### Redux
+
+**Redux** is a predictable state container for JavaScript apps. It uses a strict unidirectional data flow and centralizes your application's state.
+
+**How it works:**
+
+* Actions describe what happened.
+* Reducers update the state based on actions.
+* The store holds the global state.
+
+**Pros:**
+
+* Excellent tooling (Redux DevTools).
+* Middleware (like `redux-thunk` or `redux-saga`) for side effects.
+* Good for large applications with many state transitions.
+
+**Cons:**
+
+* Boilerplate code (though Redux Toolkit helps).
+* Learning curve for newcomers.
+
+**Redux Toolkit** simplifies Redux by reducing boilerplate.
+
+**Example:** store.js
+
+```js
+import { createSlice, configureStore } from '@reduxjs/toolkit';
+
+const counterSlice = createSlice({
+  name: 'counter',
+  initialState: { value: 0 },
+  reducers: {
+    increment: state => { state.value += 1; },
+    decrement: state => { state.value -= 1; }
+  }
+});
+
+export const { increment, decrement } = counterSlice.actions;
+
+export const store = configureStore({
+  reducer: {
+    counter: counterSlice.reducer
+  }
+});
+```
+
+**Example:** counter.jsx
+
+```js
+import { useSelector, useDispatch } from 'react-redux';
+import { increment, decrement } from './store';
+
+function Counter() {
+  const count = useSelector(state => state.counter.value);
+  const dispatch = useDispatch();
+
+  return (
+    <div>
+      <p>Count: {count}</p>
+      <button onClick={() => dispatch(increment())}>+</button>
+      <button onClick={() => dispatch(decrement())}>-</button>
+    </div>
+  );
+}
+```
+
+---
+
+### Zustand
+
+**Zustand** is a modern alternative that uses a simpler API and encourages **minimalistic state architecture**. It uses hooks under the hood and avoids provider wrappers.
+
+**How it works:**
+
+* You define a custom store hook using `create()`.
+* Access the state directly via that hook.
+
+**Pros:**
+
+* Very lightweight.
+* No need for context or reducers.
+* Supports React DevTools.
+* Scales well for mid-size apps.
+
+**Cons:**
+
+* Still maturing compared to Redux.
+* Some devs prefer more structure in large apps.
+
+```js
+import create from 'zustand';
+
+const useStore = create(set => ({
+  count: 0,
+  increment: () => set(state => ({ count: state.count + 1 }))
+}));
+
+function Counter() {
+  const { count, increment } = useStore();
+  return <button onClick={increment}>Count: {count}</button>;
+}
+```
+
+---
+
+## Choosing the Right Tool
+
+| Use Case                    | Recommended Tool          |
+| --------------------------- | ------------------------- |
+| Simple component state      | `useState` / `useReducer` |
+| Share light global state    | `Context API`             |
+| Complex global state        | `Redux` or `Zustand`      |
+| Minimal, scalable, flexible | `Zustand`                 |
+
+---
+
+## Final Thoughts
+
+There’s no one-size-fits-all solution for state management. Start with React's built-in tools (`useState`, `useReducer`, and `Context`), and scale up as your app grows. Understanding the pros and cons of each method helps you keep your app performant and maintainable.
