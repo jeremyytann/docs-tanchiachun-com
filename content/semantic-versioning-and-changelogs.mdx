@@ -1,0 +1,125 @@
+---
+
+title: "Semantic Versioning and Changelogs"
+description: "Learn the principles of semantic versioning and how to maintain effective changelogs for your projects."
+tags: ["Versioning", "Changelog"]
+
+---
+
+## What is Semantic Versioning?
+
+**Semantic Versioning** (often abbreviated as **SemVer**) is a versioning system that helps developers convey meaning about the underlying changes in a software release.
+
+A semantic version number is structured as:
+
+```
+MAJOR.MINOR.PATCH
+```
+
+* **MAJOR** version when you make **incompatible API changes**
+* **MINOR** version when you add functionality in a **backward-compatible** manner
+* **PATCH** version when you make **backward-compatible bug fixes**
+
+### Example: SemVer
+
+```
+1.4.2
+```
+
+* 1 → Major version
+* 4 → Minor version (new features added)
+* 2 → Patch version (bug fixes only)
+
+### Example: Pre-release and Build Metadata
+
+SemVer also supports optional metadata:
+
+```
+1.0.0-alpha+001
+```
+
+* `alpha` = pre-release label
+* `+001` = build metadata
+
+---
+
+## Why Use Semantic Versioning?
+
+* Sets clear expectations for users
+* Improves dependency management in package ecosystems
+* Communicates impact and urgency of updates
+* Prevents accidental breakage in integrations
+
+---
+
+## What is a Changelog?
+
+A **changelog** is a file (commonly named `CHANGELOG.md`) that records **notable changes** in a project. It's intended for developers and users to quickly see what’s new, fixed, or changed.
+
+---
+
+## Why Keep a Changelog?
+
+* **Transparency**: Users and contributors can see what’s changed and why.
+* **Collaboration**: Helps teams coordinate changes and understand the evolution of the codebase.
+* **User Communication**: Provides clear documentation for version upgrades, including breaking changes or new features.
+* **Debugging**: When bugs appear, changelogs offer clues on when regressions may have been introduced.
+
+---
+
+## What Makes a Good Changelog?
+A good changelog is:
+
+* **Human-readable**: Avoid raw Git commit logs. Summarize meaningfully.
+* **Structured**: Group changes into categories like `Added`, `Changed`, `Deprecated`, `Fixed`, `Removed`, and `Security`.
+* **Consistent**: Use the same format for every release.
+* **Versioned**: Clearly associate entries with specific version numbers.
+* **Dated**: Include the release date for each version.
+
+### Example: Changelog (Using Keep a Changelog Format)
+
+```markdown
+## [1.2.0] - 2025-05-24
+
+### Added
+- Support for uploading multiple images in user profiles.
+- New dashboard filters by region.
+
+### Changed
+- Upgraded `axios` from 0.21.1 to 1.2.3.
+- Refactored authentication flow for better performance.
+
+### Fixed
+- Resolved issue where dark mode wouldn't persist after refresh.
+
+### Security
+- Patched XSS vulnerability on the comment section.
+```
+
+---
+
+## Best Practices for Changelogs
+
+* Use Keep a Changelog format.
+* Always tag your versions in Git:
+
+```bash
+  git tag -a v1.2.0 -m "Release version 1.2.0"
+  git push origin v1.2.0
+```
+
+* Keep a CHANGELOG.md file at the root of your project.
+
+---
+
+## Final Thoughts
+
+Semantic versioning and well-maintained changelogs enhance collaboration, reliability, and trust. They help your software tell a clear story — one version at a time.
+
+---
+
+## References
+
+[SemVer Official Website](https://semver.org)
+
+[Keep a Changelog](https://keepachangelog.com)
