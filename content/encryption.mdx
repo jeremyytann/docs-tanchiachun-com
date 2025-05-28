@@ -1,0 +1,120 @@
+---
+title: "Encryption"
+description: "Understand the basics of encryption, why it matters, how it works, and where it’s used—all explained in simple terms."
+tags: ["Encryption", "Security", "Networking", "Privacy"]
+---
+
+## What is Encryption?
+
+Encryption is the process of converting **plain text** (readable data) into **cipher text** (scrambled data) using a specific algorithm and key. Only someone with the correct key can reverse the process and read the original message.
+
+### Example:
+
+Imagine you want to send a secret note to your friend:
+
+- **Plain text**: “Meet me at 3PM.”
+- **Encrypted** (with Caesar cipher): “Phhw ph dw 3SP.”
+
+<Callout>
+  Only your friend, who knows the [Caesar cipher](https://en.wikipedia.org/wiki/Caesar_cipher) rule, can decode it.
+</Callout>
+
+---
+
+## Why is Encryption Important?
+
+Encryption protects sensitive data from unauthorized access. 
+
+Here’s why it’s critical:
+- **Privacy** — Keeps messages, emails, and documents confidential. It ensures that only the intended recipient can read the contents, even if someone intercepts the data in transit.
+- **Security** — Protects financial transactions and passwords. Encryption safeguards sensitive data such as credit card numbers, login credentials, and health records from being accessed or misused by attackers.
+- **Integrity** — Prevents data tampering. Encryption ensures that the data hasn’t been altered during transmission, preserving its original state.
+- **Compliance** — Meets regulatory requirements (like GDPR, HIPAA). Many industries are legally required to implement encryption to protect consumer data and avoid heavy fines.
+
+
+---
+
+## Types of Encryption
+
+### Symmetric Encryption
+
+- Uses **one key** to encrypt and decrypt.
+- Fast and efficient for large amounts of data.
+- Example algorithm: AES (Advanced Encryption Standard)
+
+```js
+const crypto = require('crypto');
+const key = crypto.randomBytes(32);
+const iv = crypto.randomBytes(16);
+
+const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
+let encrypted = cipher.update('Hello world', 'utf8', 'hex');
+encrypted += cipher.final('hex');
+```
+
+### Asymmetric Encryption
+
+- Uses a **pair of keys**: public (to encrypt) and private (to decrypt).
+- Common in HTTPS, email encryption.
+- Example algorithm: RSA
+
+```js
+const { generateKeyPairSync, publicEncrypt, privateDecrypt } = require('crypto');
+const { publicKey, privateKey } = generateKeyPairSync('rsa', {
+  modulusLength: 2048,
+});
+
+const data = Buffer.from("Secret");
+const encrypted = publicEncrypt(publicKey, data);
+const decrypted = privateDecrypt(privateKey, encrypted);
+```
+
+---
+
+## Where Encryption is Used
+
+- Messaging apps (e.g. WhatsApp, Signal)
+- Websites (HTTPS)
+- Password storage (bcrypt, scrypt)
+- Online banking
+- VPN and secure browsing
+
+---
+
+## Common Encryption Algorithms
+
+| Algorithm | Type        | Common Use                |
+|----------|-------------|---------------------------|
+| AES      | Symmetric   | File & disk encryption    |
+| RSA      | Asymmetric  | Secure key exchange       |
+| ECC      | Asymmetric  | Efficient mobile encryption |
+| SHA-256  | Hashing     | Blockchain, data integrity |
+| bcrypt   | Hashing     | Password storage          |
+
+---
+
+## Hashing vs. Encryption
+
+Hashing is **one-way** and irreversible. Encryption is **two-way**.
+
+| Feature       | Encryption         | Hashing           |
+|---------------|--------------------|--------------------|
+| Reversible    | Yes (with key)     | No                 |
+| Use Case      | Messaging, files   | Password storage   |
+| Example Algo  | AES, RSA           | SHA-256, bcrypt    |
+
+---
+
+## Conclusion
+
+Encryption is all around us — from securing your bank app to protecting chats with your friends. Understanding the basics of how it works is essential in today’s digital age.
+
+Stay secure, and remember: if it’s not encrypted, it’s not private.
+
+---
+
+## References
+
+[How HTTPS Works](https://howhttps.works/)
+
+[The Caesar Cipher Explained](https://en.wikipedia.org/wiki/Caesar_cipher)

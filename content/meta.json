@@ -41,6 +41,8 @@
     "routers",
     "state-management",
     "virtual-dom",
+    "---Security---",
+    "encryption",
     "---Software Engineering---",
     "semantic-versioning-and-changelogs",
     "technical-debt"
