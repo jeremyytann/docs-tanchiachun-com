@@ -43,6 +43,7 @@
     "virtual-dom",
     "---Security---",
     "encryption",
+    "hashing",
     "---Software Engineering---",
     "semantic-versioning-and-changelogs",
     "technical-debt"

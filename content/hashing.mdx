@@ -1,0 +1,109 @@
+---
+title: "Hashing: One-Way Data Security"
+description: "Learn what hashing is, how it works, and where it's used to keep data safe in modern applications."
+tags: ["Hashing", "Security", "Data Integrity", "Networking"]
+---
+
+## Introduction
+
+In the world of cybersecurity, **hashing** is like creating a digital fingerprint of data. It plays a vital role in protecting sensitive information such as passwords, digital signatures, and even ensuring the integrity of files.
+
+In this guide, we’ll walk through what hashing is, how it works, its differences from encryption, and where it's commonly used.
+
+---
+
+## What is Hashing?
+
+Hashing is the process of converting any input (like a string, file, or message) into a fixed-size string of characters, which usually looks like a random combination of letters and numbers. This result is known as a **hash value** or **digest**.
+
+### Example: Hashing
+
+```js
+const crypto = require('crypto');
+const hash = crypto.createHash('sha256');
+hash.update('mypassword');
+console.log(hash.digest('hex'));
+// Output: e.g., "89b1...d7fc"
+```
+
+---
+
+## Why is Hashing Important?
+
+- **Password Security** — Hashing ensures stored passwords aren’t saved in plain text.
+- **Data Integrity** — Verify if data was modified (e.g. file downloads).
+- **Digital Signatures** — Ensures the authenticity of digital documents.
+- **Efficient Lookups** — Used in data structures like hash tables.
+
+---
+
+## Properties of a Good Hash Function
+
+1. **Deterministic** — Same input always gives the same output.
+2. **Fast to Compute** — Efficient for large-scale use.
+3. **Irreversible** — Can’t reverse the hash back to the original input.
+4. **Collision Resistant** — Two inputs shouldn’t produce the same output.
+5. **Avalanche Effect** — Small change in input changes hash drastically.
+
+---
+
+## Common Hashing Algorithms
+
+| Algorithm  | Output Size | Usage                         |
+|-----------|-------------|-------------------------------|
+| MD5       | 128-bit     | Deprecated, legacy systems    |
+| SHA-1     | 160-bit     | Deprecated, weak collision    |
+| SHA-256   | 256-bit     | Secure, used in blockchain    |
+| SHA-3     | 256-bit+    | Modern alternative            |
+| bcrypt    | Variable    | Password hashing              |
+| scrypt    | Variable    | Resource-intensive password hashing |
+
+---
+
+## Hashing vs Encryption
+
+| Feature        | Hashing                   | Encryption                |
+|----------------|---------------------------|----------------------------|
+| Direction      | One-way (irreversible)    | Two-way (reversible)      |
+| Purpose        | Integrity & verification  | Confidentiality           |
+| Use Case       | Passwords, file checksums | Messages, data storage    |
+| Output Length  | Fixed                     | Variable                  |
+
+---
+
+## Where Hashing is Used
+
+- Storing secure passwords in databases
+- Verifying file integrity during downloads
+- Digital signatures for documents
+- Cryptographic operations (e.g. blockchain, authentication tokens)
+
+---
+
+## Salting: Strengthening Password Hashing
+
+A **salt** is a random value added to passwords before hashing to defend against dictionary and rainbow table attacks.
+
+```js
+const salt = crypto.randomBytes(16).toString('hex');
+const password = 'mypassword';
+const hash = crypto.createHash('sha256');
+hash.update(password + salt);
+console.log(hash.digest('hex'));
+```
+
+---
+
+## Conclusion
+
+Hashing is a foundational concept in data security. While it's not a silver bullet, when used correctly, especially with salting, it can be incredibly effective for protecting sensitive information.
+
+---
+
+## References
+
+[Crypto Module in Node.js](https://nodejs.org/api/crypto.html)
+
+[MDN Web Docs - Hashing](https://developer.mozilla.org/en-US/docs/Web/Security)
+
+[OWASP Password Storage Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html)
