@@ -1,0 +1,85 @@
+---
+title: "ACID Principles"
+description: "An explanation of the ACID properties (Atomicity, Consistency, Isolation, and Durability), that ensure reliable database transactions."
+tags: ["Database", "ACID", "Transactions", "Data Integrity"]
+---
+
+## Introduction
+
+Ever wondered how databases manage to keep your data accurate and consistent even when multiple users are interacting with them at the same time? The answer lies in the **ACID properties**.
+
+ACID is an acronym that stands for:
+- **Atomicity**
+- **Consistency**
+- **Isolation**
+- **Durability**
+
+These properties are essential to ensure reliable and robust database transactions.
+
+---
+
+## Atomicity
+
+**Atomicity** means that a transaction is an all-or-nothing operation. Either all the operations within the transaction are completed successfully, or none are.
+
+### Example:
+If you’re transferring money between two accounts:
+1. Deduct from Account A
+2. Add to Account B
+
+If step 2 fails, step 1 must be rolled back to maintain balance integrity.
+
+---
+
+## Consistency
+
+**Consistency** ensures that a transaction brings the database from one valid state to another, maintaining all predefined rules, such as constraints, cascades, and triggers.
+
+### Example:
+If there's a rule that a user’s age must be >= 0, any transaction that tries to insert `-5` as an age will be rejected to maintain consistency.
+
+---
+
+## Isolation
+
+**Isolation** means that the operations of one transaction are invisible to other transactions until the transaction is complete. This prevents concurrent transactions from interfering with each other.
+
+### Example:
+Two people trying to book the last ticket at the same time. Isolation ensures only one succeeds.
+
+Databases implement isolation through various isolation levels (Read Uncommitted, Read Committed, Repeatable Read, Serializable).
+
+---
+
+## Durability
+
+**Durability** guarantees that once a transaction is committed, its changes are permanent, even in the case of a power failure or crash.
+
+### Example:
+Once your online purchase confirms your order, that transaction is saved to disk and will not be lost, even if the server crashes right after.
+
+---
+
+## Why ACID Matters
+
+Without ACID properties:
+- Data might become inconsistent or incorrect
+- Users might see stale or incorrect information
+- Systems may be vulnerable to crashes and data loss
+
+In short, ACID is what makes transactional databases **trustworthy**.
+
+---
+
+## Final Thoughts
+
+Understanding ACID helps you reason about how your applications handle data and avoid bugs, corruption, and concurrency issues.
+
+If your project requires high data integrity (e.g., banking, healthcare, ecommerce), always make sure your database supports and adheres to ACID principles.
+
+---
+
+## References
+[ACID Transactions on Wikipedia](https://en.wikipedia.org/wiki/ACID)
+
+[Database Isolation on Wikipedia](https://en.wikipedia.org/wiki/Isolation_(database_systems))
