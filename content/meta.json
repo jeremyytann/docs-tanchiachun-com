@@ -42,6 +42,8 @@
     "routers",
     "state-management",
     "virtual-dom",
+    "---React Native---",
+    "ssl-pinning-in-react-native",
     "---Security---",
     "encryption",
     "hashing",

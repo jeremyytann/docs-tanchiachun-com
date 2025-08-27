@@ -1,0 +1,170 @@
+---
+title: SSL Pinning in React Native
+description: Learn how to implement SSL pinning in a React Native app to enhance security by trusting specific public keys.
+tags: ["React Native", "SSL Pinning", "Security", "Mobile Development"]
+---
+
+## Implementing SSL Pinning in a React Native App
+
+SSL pinning adds an extra layer of security to your mobile app by ensuring it only trusts specific SSL certificates or public keys. This prevents attackers from intercepting and tampering with your network traffic, even if they install a malicious root certificate on the device.
+
+---
+
+## Steps to Implement SSL Pinning
+
+### Step 1. Install the library
+For React Native, one common library is [`react-native-ssl-public-key-pinning`](https://github.com/frw/react-native-ssl-public-key-pinning).
+
+```bash
+npm install react-native-ssl-public-key-pinning
+```
+
+Or with Yarn:
+
+```bash
+yarn add react-native-ssl-public-key-pinning
+```
+
+### Step 2. Get the public key hashes
+
+You need to extract **at least two** public keys from your SSL certificate chain:
+
+- **Leaf certificate (your domain’s certificate)**
+- **Intermediate certificate**
+
+<Callout type="info">
+  TrustKit (native iOS library) enforces two pins which will cause initializeSslPinning to throw an exception if only one pin is provided.
+</Callout>
+
+Run the command belows in your terminal, replacing `yourdomain.com` with your actual domain:
+
+```bash
+# Leaf certificate
+openssl s_client -connect yourdomain.com:443 -servername yourdomain.com -showcerts </dev/null 2>/dev/null \
+| awk '/BEGIN CERTIFICATE/{i++}i==1{print; if (/END CERTIFICATE/) exit}' \
+| openssl x509 -pubkey -noout \
+| openssl pkey -pubin -outform DER \
+| openssl dgst -sha256 -binary \
+| openssl base64
+
+# Intermediate certificate
+openssl s_client -connect yourdomain.com:443 -servername yourdomain.com -showcerts </dev/null 2>/dev/null \
+| awk '/BEGIN CERTIFICATE/{i++}i==2{print; if (/END CERTIFICATE/) exit}' \
+| openssl x509 -pubkey -noout \
+| openssl pkey -pubin -outform DER \
+| openssl dgst -sha256 -binary \
+| openssl base64
+```
+
+This will give you Base64-encoded public key hashes.
+
+#### To identify certificates:
+
+Run the command belows in your terminal, replacing `yourdomain.com` with your actual domain:
+
+```bash
+openssl s_client -connect yourdomain.com:443 -showcerts </dev/null
+```
+
+* The **leaf** certificate is the first one in the chain.
+
+<Callout type="info">
+  Leaf certificate is issued to your domain, s:CN=yourdomain.com
+</Callout>
+
+* The **intermediate** is the next one in the chain.
+
+<Callout type="info">
+  Intermediate certificate is issued by the CA, like “R3”, “DigiCert Global G2 Intermediate”, etc.
+</Callout>
+
+### Step 3. Add configuration in your app
+
+In your main layout file (`layout.tsx` for example):
+
+#### Example: Wildcard Certificate
+
+If the leaf is a **wildcard certificate** (e.g., `*.yourdomain.com`), configure SSL pinning using the **root domain** (`yourdomain.com`).
+
+```tsx
+import { useEffect } from 'react';
+import { initializeSslPinning } from 'react-native-ssl-public-key-pinning';
+
+export default function Layout() {
+  useEffect(() => {
+    initializeSslPinning({
+      'yourdomain.com': {
+        includeSubdomains: true,
+        publicKeyHashes: [
+          'base64HashOfLeafCert==',
+          'base64HashOfIntermediateCert==',
+        ],
+      },
+    });
+  }, []);
+
+  return (
+    // your layout code
+  );
+}
+```
+
+#### Example: Non-Wildcard Certificate
+
+If the leaf is **not a wildcard certificate**, pin against the **specific API domain** (e.g., `api.yourdomain.com`).
+
+```tsx
+import { useEffect } from 'react';
+import { initializeSslPinning } from 'react-native-ssl-public-key-pinning';
+
+export default function Layout() {
+  useEffect(() => {
+    initializeSslPinning({
+      'api.yourdomain.com': {
+        publicKeyHashes: [
+          'base64HashOfLeafCert==',
+          'base64HashOfIntermediateCert==',
+        ],
+      },
+    });
+  }, []);
+
+  return (
+    // your layout code
+  );
+}
+```
+
+### Step 4. Test your implementation
+
+You can test if SSL pinning works by attempting to intercept traffic with **Burp Suite**.
+
+#### Testing with Burp Suite
+
+1. Install [Burp Suite](https://portswigger.net/burp/communitydownload)
+
+2. Go to **Proxy → Options** → Add a new listener (`All interfaces`, port `8080`)
+
+3. Configure your phone’s proxy:
+
+   * Wi-Fi → Network → Configure Proxy → Manual → Set server to your computer’s local IP `192.168.xxx.xxx`, port `8080`
+
+4. Install Burp’s Root Certificate on your phone:
+
+   * Visit `http://burp`
+   * Download and install profile → Settings → General → VPN & Device Management → Install
+   * Trust certificate: Settings → General → About → Certificate Trust Settings
+
+5. Open your app:
+
+   * If SSL pinning is working, requests will **fail** and not appear in Burp.
+   * Try another app without SSL pinning (e.g., Safari) → you should see requests in Burp.
+
+---
+
+## Conclusion
+
+Implementing SSL pinning in your React Native app significantly enhances 
+its security by ensuring that it only communicates with trusted servers. 
+Always remember to test thoroughly to ensure that the pinning is 
+functioning as expected.
