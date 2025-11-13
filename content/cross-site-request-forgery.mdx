@@ -1,0 +1,98 @@
+---
+title: "Cross-Site Request Forgery (CSRF)"
+description: "Learn how Cross-Site Request Forgery (CSRF) attacks exploit user authentication to perform unauthorized actions, and explore effective prevention strategies using CSRF tokens, SameSite cookies, and secure request validation."
+tags: ["Security", "CSRF", "Authentication"]
+---
+
+## What is Cross-Site Request Forgery (CSRF)?
+
+Cross-Site Request Forgery (CSRF) is an attack that tricks a logged-in user’s browser into sending a malicious request to a trusted website without their consent. This can result in unwanted actions being performed on behalf of the user, such as changing account details or transferring funds.
+
+---
+
+## How Does CSRF Work?
+1. Victim logs in to a trusted website.
+2. Browser stores session cookies for that site.
+3. Attacker tricks the victim into clicking a link or visiting a page containing a malicious request.
+4. Browser sends request with stored cookies, and the server believes it’s from the legitimate user.
+
+### Example:
+1. A user is logged into `bank.com` in one browser tab and has an active session cookie.
+2. The user visits a malicious site `hack.com` that contains hidden form or image that triggers a POST request:
+```
+<img src="https://bank.com/transfer?to=hacker&amount=5000" />
+```
+3. Because the user is authenticated, their browser automatically sends request with the session cookies, causing the bank to process the transaction unknowingly.
+
+---
+
+## Common Attack Vectors
+
+- Hidden image or iframe requests.
+- Malicious forms auto-submitted with JavaScript.
+- GET or POST requests exploiting stored authentication cookies.
+
+---
+
+## Common Targets and Impacts
+
+* Changing account settings
+* Performing transactions
+* Changing passwords or email forwarding
+
+---
+
+## Defenses against CSRF
+
+1. **SameSite Cookies** (Lax, Strict or None) — reduce cookie sending on cross-site requests.
+   - **Strict** — The browser will *never* send the cookie on cross-site requests. The cookie is only sent when the navigation originates from the same site. This offers the strongest CSRF protection but can break legitimate cross-site flows. For example, external links that open a site and expect the user to stay logged in.
+   - **Lax** — A balance between security and usability. Cookies are **not** sent on most cross-site subrequests (like images or iframes), but **are** sent when the user performs a top-level navigation using a safe HTTP method (typically GET). For example, following a link. Lax prevents many CSRF scenarios while still supporting common cross-site link navigation flows.
+2. **Anti-CSRF Tokens** (synchronizer tokens) — include a per-session (or per-form) unpredictable token in forms and validate on server.
+3. **Double Submit Cookie** — send token both as cookie and request param and validate they match.
+4. **Use Safe HTTP Methods** — require state-changing actions to use POST/PUT/PATCH/DELETE and verify CSRF protection.
+5. **Check Origin / Referer Headers** — validate requests come from allowed origins
+   - Referer can be absent in some cases
+
+### Example: SameSite Cookie (Set-Cookie Header)
+
+Set cookies with the SameSite attribute to prevent cross-site requests.
+
+```
+Set-Cookie: session=abc123; Path=/; HttpOnly; Secure; SameSite=Lax
+```
+
+### Example: Synchronizer Token with Node/Express
+
+Generate a unique, unpredictable token for each session or request, and validate it server-side.
+
+```js
+// generate token when rendering form
+app.get('/transfer', (req, res) => {
+  const token = crypto.randomBytes(32).toString('hex');
+  req.session.csrfToken = token;
+  res.render('transfer', { csrfToken: token });
+});
+
+// validate on submit
+app.post('/transfer', (req, res) => {
+  const token = req.body.csrfToken;
+  if (!token || token !== req.session.csrfToken) return res.status(403).send('CSRF validation failed');
+  // process transfer
+});
+```
+
+---
+
+## Conclusion
+
+CSRF exploits a website’s trust in a user’s browser. Preventing it requires verifying the intent of the request using CSRF tokens, secure cookies, and strict validation measures.
+
+---
+
+## References
+
+[OWASP: Cross-Site Request Forgery (CSRF)](https://owasp.org/www-community/attacks/csrf)
+
+[MDN: Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CSP)
+
+[stackoverflow: Difference between Lax and Strict](https://stackoverflow.com/questions/59990864/what-is-the-difference-between-samesite-lax-and-samesite-strict)
