@@ -19,7 +19,7 @@ Cross-Site Request Forgery (CSRF) is an attack that tricks a logged-in user’s 
 ### Example:
 1. A user is logged into `bank.com` in one browser tab and has an active session cookie.
 2. The user visits a malicious site `hack.com` that contains hidden form or image that triggers a POST request:
-```
+```html
 <img src="https://bank.com/transfer?to=hacker&amount=5000" />
 ```
 3. Because the user is authenticated, their browser automatically sends request with the session cookies, causing the bank to process the transaction unknowingly.
