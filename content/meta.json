@@ -45,6 +45,7 @@
     "---React Native---",
     "ssl-pinning-in-react-native",
     "---Security---",
+    "cross-site-scripting",
     "cross-site-request-forgery",
     "encryption",
     "hashing",

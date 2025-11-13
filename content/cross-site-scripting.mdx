@@ -1,0 +1,193 @@
+---
+title: Cross-Site Scripting (XSS)
+description: Learn what Cross-Site Scripting (XSS) is, the different types (stored, reflected, DOM-based), how attacks are executed, practical mitigation techniques (escaping, CSP, safe APIs), and hands-on exercises to practice finding and fixing XSS.
+tags: [security, xss, web-security, javascript, frontend]
+---
+
+## What is Cross-Site Scripting (XSS)?
+
+Cross-Site Scripting (XSS) occurs when an application includes untrusted user input in web pages without proper validation or escaping, allowing attackers to execute arbitrary JavaScript in other users' browsers. XSS is one of the most common and dangerous web vulnerabilities because it directly targets users, not just the server.
+
+---
+
+## Why XSS Matters
+
+* Steal session cookies or tokens (unless cookies are `HttpOnly`).
+* Perform actions on behalf of users (CSRF-like effects combined with stolen auth).
+* Build phishing UIs inside the app to capture credentials.
+* Keylogging, content manipulation, or redirecting to malicious sites.
+* Spread worms that propagate through stored content.
+
+---
+
+## Types of XSS
+
+### Stored (Persistent) XSS
+
+Malicious script is stored on the server (e.g., in a comment, profile, or message) and later served to users. This is high-impact because every visitor that loads the page executes the script.
+
+#### Example Flow
+
+Attacker posts `<script>…</script>` inside a comment. When other users view the comment, the script runs in their browsers.
+
+### Reflected (Non-persistent) XSS
+
+Malicious input is reflected immediately in the response (e.g., search results page or error message). The attacker crafts a URL containing the payload and tricks a victim into clicking it.
+
+#### Example Flow
+
+The browser loads `https://example.com/search?q=<script>alert(1)</script>` and the application echoes `q` directly into the HTML without escaping.
+
+### DOM-based XSS
+
+The vulnerability exists entirely in client-side JavaScript: the app reads an attacker-controlled value (location.hash, URL param, or document.cookie) and writes it to the DOM unsafely (e.g., `innerHTML`, `document.write`). The server may be safe, but the client-side code is not.
+
+#### Example Flow
+
+An attacker-controlled hash runs as HTML/JS.
+
+```
+const q = location.hash;
+document.getElementById('out').innerHTML = q;
+```
+
+---
+
+## Common XSS Injection Points
+
+* User profile fields (name, bio)
+* Comments and forum posts
+* Search or feedback forms reflected back to the user
+* Third-party widgets or editor content (WYSIWYG/HTML)
+* Client-side code that writes user-controlled values into the DOM
+
+---
+
+## Defenses against XSS
+
+1. **Contextual Output Escaping** (primary defense) — always escape untrusted data **based on where it's inserted**.
+    - **HTML Body**: escape `< > &` and quotes
+    - **HTML Attribute**: escape quotes and ensure proper quoting
+    - **JavaScript Context**: escape or serialize safely (avoid string construction)
+    - **URL Context**: use `encodeURIComponent`
+
+    **Example: Server-side**
+    ```js
+    function escapeHtml(str) {
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+    res.send(`<div>${escapeHtml(userInput)}</div>`);
+    ```
+
+    <Callout>
+      Frameworks like React, Angular, and server-side templating engines usuall y provide automatic escaping for HTML contexts, prefer them over manual string concatenation.
+    </Callout>
+
+2. **Avoid Dangerous APIs**
+
+    - Prefer `textContent`, `setAttribute`, and DOM methods that treat input as text, not HTML. 
+    - Avoid `innerHTML`, `document.write`, `eval`, and `new Function` where possible.
+    - **Safer:** `el.textContent = userInput;` 
+    - **Unsafe:** `el.innerHTML = userInput;`
+
+3. **Content Security Policy (CSP)**
+
+    - Use CSP to restrict where scripts/styles can be loaded from and to prevent inline script execution. A strong CSP significantly reduces impact even if XSS exists.
+    
+    **Example header:**
+    ```
+    Content-Security-Policy: default-src 'self'; script-src 'self' 'nonce-<RANDOM>'; object-src 'none'; base-uri 'self';
+    ```
+
+    - Use nonces for trusted inline scripts and avoid `'unsafe-inline'`.
+
+4. **HTTPOnly Cookies**
+
+    - Mark authentication cookies as `HttpOnly` to prevent JavaScript access. This mitigates the common goal of cookie theft via XSS (though not other attack effects).
+
+5. **Proper Input Validation & Sanitization (defense-in-depth)**
+
+    - Validate inputs for expected formats (length, type). When you must allow HTML (e.g., rich text editors), sanitize it server-side using a well-maintained library (DOMPurify, sanitize-html) that removes dangerous tags/attributes while preserving safe markup.
+
+6. Escape in templates, not at input time
+
+    - Prefer output escaping over input sanitization as the primary control, because the same input may be used in different contexts requiring different escaping rules.
+
+---
+
+## DOM-based XSS — Deeper Dive
+
+DOM XSS happens when client code directly places attacker-controlled data into the DOM without escaping. 
+
+### Common Dangerous Patterns:
+
+```js
+el.innerHTML = location.hash; // unsafe
+el.setAttribute('onclick', 'doSomething("' + userInput + '")'); // unsafe
+```
+
+### Safe Alternatives:
+
+```js
+el.textContent = location.hash; // safe for text
+el.addEventListener('click', () => doSomething(userInput)); // safe event handler
+```
+
+<Callout type="warn">
+  Watch out for third-party libraries or widgets that manipulate the DOM, they can introduce DOM XSS vulnerabilities.
+</Callout>
+
+---
+
+## Examples of Vulnerabilities & Fixes
+
+### Stored XSS (vulnerable)
+
+User-submitted comments are saved and later rendered as-is.
+
+**Fix:** escape on render, and sanitize rich-text inputs with a library that strips `<script>` and dangerous attributes like `onerror`.
+
+### Reflected XSS (vulnerable)
+
+```js
+app.get('/search', (req, res) => {
+  const q = req.query.q || '';
+  res.send(`<h1>Search results for ${q}</h1>`);
+});
+```
+
+**Fix:** escape `q` before rendering or use a templating engine that auto-escapes.
+
+---
+
+## Testing for XSS
+
+* **Manual Testing**: inject payloads like `<script>alert(1)</script>`, `<img src=x onerror=alert(1)>`, or JS URI payloads.
+* **Automated Scanners**: OWASP ZAP, Burp Suite, Arachni.
+* **Use Browser DevTools**: to inspect DOM and see whether payloads are treated as HTML or text.
+* Test DOM sinks (innerHTML, setAttribute, location.* usage) in client code.
+
+---
+
+## Conclusion
+
+Cross-Site Scripting (XSS) is a critical web security vulnerability that allows attackers to inject malicious scripts into web pages viewed by other users. XSS can lead to theft of sensitive information, account hijacking, defacement of websites, and spread of malware. 
+
+Preventing XSS requires a combination of secure coding practices, such as proper input validation, output encoding, and the use of security headers like Content Security Policy (CSP).
+
+**In short**: never trust user input directly in the DOM without proper escaping or sanitization.
+
+---
+
+## References
+
+[OWASP: Cross Site Scripting (XSS)](https://owasp.org/www-community/attacks/xss/)
+
+[MDN: Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CSP)
+
+[DOMPurify Documentation](https://github.com/cure53/DOMPurify?tab=readme-ov-file#readme)
