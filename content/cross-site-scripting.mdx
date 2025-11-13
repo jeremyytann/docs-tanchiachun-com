@@ -114,7 +114,7 @@ document.getElementById('out').innerHTML = q;
 
     - Validate inputs for expected formats (length, type). When you must allow HTML (e.g., rich text editors), sanitize it server-side using a well-maintained library (DOMPurify, sanitize-html) that removes dangerous tags/attributes while preserving safe markup.
 
-6. Escape in templates, not at input time
+6. **Escape in templates, not at input time**
 
     - Prefer output escaping over input sanitization as the primary control, because the same input may be used in different contexts requiring different escaping rules.
 
