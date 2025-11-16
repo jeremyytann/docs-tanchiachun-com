@@ -1,0 +1,167 @@
+---
+title: Rate Limiting
+description: A deep dive into core rate limiting algorithms including Token Bucket, Sliding Window, and API throttling, explaining how they work and when to use them.
+tags: ["Security", "Rate Limiting"]
+---
+
+## Introduction
+
+Rate limiting is a fundamental security and performance mechanism used to control how many requests a client can make to a server within a given timeframe. Without rate limiting, APIs become vulnerable to abuse, DDoS attacks, brute-force attempts, and unintentional traffic spikes that can degrade system performance.
+
+This guide explains how rate limiting works, why it’s essential, and the commonly used algorithms such as Token Bucket and Sliding Window. By the end, you’ll understand how to choose the right strategy for your application.
+
+---
+
+## What Is Rate Limiting?
+
+Rate limiting restricts the number of actions a user or client can perform within a specific period. It ensures fair usage and protects the server from overload.
+
+### Example:
+* Limiting login attempts to prevent brute-force attacks.
+* Preventing API abuse from bots.
+* Slowing down scrapers.
+* Protecting backend resources during traffic peaks.
+
+---
+
+## Why Rate Limiting Matters
+
+* **Security**: Stops attackers from overwhelming your server.
+* **Stability**: Prevents sudden traffic spikes from crashing your system.
+* **Fairness**: Ensures all users get equal access.
+* **Cost Control**: Reduces unnecessary compute and bandwidth costs.
+
+---
+
+## Core Algorithms Used in Rate Limiting
+
+There are several ways to implement rate limiting. Here are the most common and effective ones.
+
+### Token Bucket Algorithm
+
+The Token Bucket algorithm allows requests as long as tokens are available. Tokens refill at a fixed rate.
+
+#### How It Works
+
+* A "bucket" holds a certain number of tokens (e.g. 100).
+* Each request consumes one token.
+* Tokens replenish over time (e.g. 10 tokens per second).
+* If the bucket is empty, requests are rejected or delayed.
+
+#### Benefits
+
+* Allows short bursts of high traffic.
+* Smooths out rate over time.
+* Widely used by CDN and cloud services.
+
+#### Drawbacks
+
+* Allows traffic bursts that may overwhelm downstream systems if not buffered properly.
+* Does not guarantee even spacing between requests.
+* Harder to tune because bucket size and refill rate affect behavior in non-intuitive ways.
+* Not ideal when you need strict, perfectly enforced request intervals.
+
+
+#### Best For
+
+* APIs that need flexibility.
+* Systems that tolerate short bursts but want overall control.
+
+### Sliding Window Algorithm
+
+The Sliding Window counters requests in a rolling timeframe instead of resetting every fixed interval.
+
+#### How It Works
+
+* Tracks timestamps for each request.
+* Checks how many requests were made in the last X seconds.
+* If the count exceeds the limit, the request is blocked.
+
+#### Benefits
+
+* More accurate and fair than fixed windows.
+* Prevents burst abuse right after a window resets.
+
+#### Drawbacks
+
+* Requires storing many timestamps, memory usage grows with high traffic volume.
+* Timestamp cleanup operations add CPU overhead under heavy load.
+* More complex to implement correctly compared to Token Bucket or Fixed Window.
+* Slightly less predictable than a fixed interval when implemented with rolling timestamps.
+
+#### Best For
+
+* Login endpoints.
+* Systems requiring more predictable distribution.
+
+### Fixed Window Algorithm
+
+Although simpler, it's worth mentioning.
+
+#### How It Works
+
+* Counts requests within a fixed interval (e.g. per minute).
+* Resets at the end of each interval.
+
+#### Benefits
+
+* Very simple to implement, just store a single counter and reset it at fixed intervals.
+* Constant memory usage, only one counter per user/IP is required.
+* Good enough for low-risk APIs or internal tools.
+* Works with almost any caching layer (Redis, in-memory, etc).
+
+#### Drawbacks
+
+* Highly vulnerable to boundary bursts. Attackers can make 100 requests at `12:00:59` and another 100 requests at `12:01:00`, effectively sending 200 requests in 2 seconds.
+* Uneven traffic distribution due to hard resets.
+* Not ideal for security-sensitive endpoints like login or payments.
+* Less fair than Sliding Window or Token Bucket because traffic can be "clumped".
+
+#### Best For
+
+* Low-risk, low-traffic APIs.
+* Internal admin dashboards.
+* Services where simplicity matters more than precision.
+* Scenarios where occasional burst tolerance is acceptable.
+
+---
+
+## Rate Limiting vs. API Throttling
+
+**Rate limiting** sets the maximum number of allowed actions.
+
+**API throttling** slows down responses when a user approaches the limit.
+
+### Example:
+
+* **Rate limiting**: Max 100 requests per minute.
+* **API throttling**: After 80 requests, slow down responses rather than outright blocking.
+
+Throttling improves user experience while still preventing abuse.
+
+---
+
+## Choosing the Right Strategy
+
+Use **Token Bucket** if:
+
+* You want burst flexibility.
+* Your API handles varying traffic loads.
+
+Use **Sliding Window** if:
+
+* You need precise, fair limits.
+* You want predictable request distribution.
+
+Use **Fixed Window** if:
+
+* Simplicity is your priority.
+* Traffic patterns are low-risk.
+
+---
+
+## Conclusion
+
+Rate limiting is one of the most important tools for protecting APIs against abuse and ensuring stability. By understanding algorithms like Token Bucket and Sliding Window, you can implement smarter controls that balance fairness, security, and performance.
+
+Whether you're building login endpoints, public APIs, or internal services, effective rate limiting is essential for a healthy, resilient system.

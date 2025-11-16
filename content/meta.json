@@ -49,6 +49,7 @@
     "cross-site-request-forgery",
     "encryption",
     "hashing",
+    "rate-limiting",
     "---Software Engineering---",
     "semantic-versioning-and-changelogs",
     "technical-debt"
