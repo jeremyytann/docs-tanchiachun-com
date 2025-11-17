@@ -1,0 +1,156 @@
+---
+
+title: Caching Strategies
+description: A comprehensive guide to modern caching strategies, why caching matters, and detailed breakdowns of each major strategy including advantages, challenges, and use cases.
+tags: ["caching", "performance", "backend", "system design", "web development"]
+-------------------------------------------------------------------------------
+
+## What is Caching?
+
+Caching is the practice of storing copies of frequently accessed data in a temporary, high-speed storage layer. It significantly reduces response time, minimizes database load, and improves the scalability of applications. Without caching, servers must repeatedly fetch or compute the same data, resulting in slower user experiences and higher infrastructure costs.
+
+### Caching is critical because it:
+
+* Improves application performance and reduces latency
+* Saves compute resources by avoiding repeated processing
+* Lowers database and network load
+* Enhances scalability during high traffic
+* Helps deliver a smoother user experience
+
+---
+
+## Types of Caching Strategies
+
+### 1. Cache-aside (Lazy Loading)
+
+**Description:** Data is loaded into the cache only when requested. If the cache does not have the data (cache miss), the application loads it from the database and stores it in the cache.
+
+**Advantages:**
+- Efficient use of cache — only stores what’s needed
+- Easy to implement
+- Works well with read-heavy workloads
+
+**Challenges:**
+- First request is always slow (cache miss penalty)
+- Risk of stale data if not paired with invalidation
+
+**Use Cases:**
+- Product catalog pages
+- User profiles
+- Any read-heavy application with predictable repeated reads
+
+### 2. Write-through Cache
+
+**Description:** Every write operation updates both the cache and the database simultaneously, ensuring the cache is always up to date.
+
+**Advantages:**
+- Strong consistency between cache and database
+- Cache always contains the latest data
+
+**Challenges:**
+- Slower writes due to dual operations
+- Unnecessary caching of data that may never be read
+
+**Use Cases:**
+- Systems requiring immediate consistency (e.g., financial data)
+- Shopping carts
+
+### 3. Write-back (Write-behind)
+
+**Description:** Data is written to the cache first and persisted to the database asynchronously.
+
+**Advantages:**
+- Very fast write operations
+- Reduces database load
+
+**Challenges:**
+- Risk of data loss if cache fails before DB update
+- More complex implementation
+
+**Use Cases:**
+- High-write systems like logging or analytics events
+- Real-time counters (views, likes)
+
+### 4. Read-through Cache
+
+**Description:** The application interacts only with the cache. On a miss, the cache itself fetches data from the database and stores it automatically.
+
+**Advantages:**
+- Simplifies application logic
+- Ensures consistent cache-loading behavior
+
+**Challenges:**
+- Cache layer becomes a single point of failure
+- Can increase latency on cache misses
+
+**Use Cases:**
+- Content management systems
+- Article or blog platforms
+
+### 5. TTL-based Caching
+
+**Description:** Items stored in the cache automatically expire after a set time-to-live (TTL).
+
+**Advantages:**
+- Natural prevention of stale data
+- Simple and widely supported
+
+**Challenges:**
+- Potential for synchronized cache misses if many keys expire at once (dogpile effect)
+- Requires tuning TTL values
+
+**Use Cases:**
+- API responses (e.g., weather data)
+- Promotional banners, UI content caches
+
+### 6. CDN Caching
+
+**Description:** Caches content at geographically distributed edge locations to reduce latency for global users.
+
+**Advantages:**
+- Drastically improves global performance
+- Reduces load on the origin server
+
+**Challenges:**
+- Propagation delay for cache invalidation
+- Limited to static or semi-static content
+
+**Use Cases:**
+- Images, videos, static assets
+- Global websites and e-commerce platforms
+
+### 7. Client-side Caching
+
+**Description:** Browsers cache static files (HTML, CSS, JS, images) using headers like `Cache-Control`, `ETag`, and `Last-Modified`.
+
+**Advantages:**
+- Zero server cost for repeated loads
+- Instant load times for cached assets
+
+**Challenges:**
+- Risk of outdated assets if caching rules are not configured correctly
+- Requires versioning strategy (cache busting)
+
+**Use Cases:**
+- Web apps, PWAs
+- Any frontend-heavy application
+
+---
+
+## Choosing the Right Strategy
+
+The ideal caching strategy depends on your:
+
+* Consistency requirements
+* Read/write traffic patterns
+* Data volatility
+* Performance goals
+* Infrastructure design
+
+Often, multiple strategies are combined for optimal performance.
+
+---
+
+## Conclusion
+
+Caching is one of the most powerful techniques for improving performance, reducing system load, and enhancing user experience. Understanding the strengths and weaknesses of each caching strategy allows developers to design systems that are both fast and reliable. With the right caching approach in place, applications scale more efficiently and deliver significantly better responsiveness.
