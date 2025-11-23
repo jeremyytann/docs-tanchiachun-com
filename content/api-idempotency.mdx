@@ -1,0 +1,208 @@
+---
+title: API Idempotency
+description: A clear, practical guide to understanding idempotent APIs, why they matter, how to design them, and common patterns for building safe, resilient backend systems.
+tags: ["backend", "api", "reliability", "idempotency", "system-design"]
+---
+
+## Introduction
+
+Modern distributed systems rarely behave perfectly. Network retries, timeouts, client crashes, and duplicated requests happen every day. Without proper safeguards, these issues can lead to:
+
+* duplicate payments
+* multiple orders being placed
+* inconsistent database states
+* corrupted user data
+* race conditions
+
+**Idempotency** is a design principle that ensures **multiple identical requests have the same effect as a single request**. When used correctly, it significantly improves API reliability and protects against unintended repeated operations.
+
+---
+
+## What is Idempotency?
+
+An operation is **idempotent** if repeating it **does not change the result** beyond the initial application.
+
+### Example: Idempotent
+
+* `GET /users/123` → always safe to repeat
+* `PUT /users/123` with the same payload → same result every time
+* `DELETE /cart/1` → deleting the same cart twice still results in it being deleted
+
+### Example: Non-idempotent
+
+* `POST /orders` → creates a new order **each time**, so retries can cause duplicates
+
+---
+
+## Why Idempotency Matters
+
+Idempotency is critical for safe API design because:
+
+* Networks retry requests automatically
+* Mobile clients often lose connection mid-request
+* Users double‑tap buttons or refresh pages
+* Message queues redeliver messages
+
+Without idempotency, systems become vulnerable to incorrect behavior, especially in payment systems and transactional workflows.
+
+---
+
+## Designing Idempotent APIs
+
+### Use Idempotency Keys (Best Practice)
+
+**Clients generate a unique key** for a specific operation and send it with the request.
+
+The server checks if the idempotency key has been seen before and, if so, returns the stored result, otherwise it processes the operation and stores the outcome for future retries.
+
+#### Example: Header
+
+```
+Idempotency-Key: 6f12a93c-92ab-4e8b-b3a3-e3d92fb4102c
+```
+
+#### Benefits
+
+* Prevents duplicate operations
+* Works perfectly for `POST` endpoints (e.g., payments, orders)
+* Safe for mobile or flaky network scenarios
+
+#### Challenges
+
+* Requires persistent storage (Redis is common)
+* Keys must expire eventually
+
+#### Best For
+
+* Payments
+* Creating orders
+* Creating resources with side effects
+
+
+### Make POST Idempotent by Using Client-Generated Resource IDs
+
+Instead of `POST /orders`, use `PUT /orders/{client_generated_id}`.
+
+If the client retries with the same ID, the server creates the same resource rather than duplicating it.
+
+#### Benefits
+
+* Pure HTTP semantics (PUT is naturally idempotent)
+* Easy to track and deduplicate
+
+#### Challenges
+
+* Clients must manage unique IDs
+
+#### Best For
+
+* Order creation
+* Resource creation APIs
+
+
+### Ensure PUT and DELETE Are Truly Idempotent
+
+#### PUT should:
+
+* Replace the resource
+* Return the same output for repeated identical calls
+
+#### DELETE should return:
+
+* `200` or `204` if deleted
+* `204` if already deleted
+
+
+#### Common Pitfall
+
+Making `PUT` behave like `PATCH` accidentally.
+
+
+### Safe Retry Patterns
+
+Retries must avoid executing logic more than once.
+
+#### Examples: Safe Patterns
+
+* Using database constraints (`unique order_id`)
+* Using Redis locks (`SETNX`)
+* Using message deduplication keys for queues
+* Using optimistic concurrency (ETags, version numbers)
+
+---
+
+## Safe API Design Principles
+
+### Principle 1: Avoid Side Effects on GET
+
+`GET` should never:
+
+* create records
+* mutate data
+* trigger payments
+
+### Principle 2: Use the Right HTTP Methods
+
+* **GET**: read-only
+* **PUT**: replace a resource
+* **PATCH**: partial update
+* **DELETE**: removal
+* **POST**: create / perform non-idempotent actions
+
+### Principle 3: Use ETags for Concurrency Control
+
+ETags prevent overwriting changes made by other clients.
+
+#### Example:
+
+```
+If-Match: "v12"   → update only if version matches
+```
+
+### Principle 4: Validate Inputs Strictly
+
+Never trust:
+
+* client-generated prices
+* user-provided IDs without verification
+* client-calculated totals in purchases
+
+### Principle 5: Use Consistent Error Codes
+
+Consistent error responses help clients implement stable retry logic.
+
+---
+
+## Common Real‑World Examples
+
+### Payments
+
+Payment providers (Stripe, PayPal) rely heavily on idempotency keys to prevent double-charging.
+
+### Order Systems
+
+E-commerce backends use idempotent order creation to avoid duplicate orders caused by retries.
+
+### Messaging & Queues
+
+Message queues retry deliveries; idempotent handlers prevent duplicate side effects.
+
+### File Uploads
+
+Chunked uploads require idempotent operations per chunk.
+
+---
+
+## Conclusion
+
+Idempotency and safe API design are essential for building reliable, user-friendly, and fault-tolerant systems. By designing APIs that can safely handle retries, duplicate calls, and network unpredictability, you significantly reduce bugs, prevent catastrophic issues like duplicate payments, and ensure your platform behaves consistently in real-world environments.
+
+Understanding and applying idempotency principles makes you a stronger backend engineer and improves the long‑term stability of any distributed system.
+
+---
+
+## References
+
+[AWS Architecture Blog: Making retries safe with idempotent APIs](https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/)
+
+[RESTful API: Idempotent REST API](https://restfulapi.net/idempotent-rest-apis/)
