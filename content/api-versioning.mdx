@@ -1,0 +1,108 @@
+---
+title: "API Versioning"
+description: "Learn how API versioning prevents breaking changes and explore common implementation strategies like URI paths, query parameters, and headers."
+tags: ["Backend", "API Design", "Architecture"]
+---
+
+## What is API Versioning?
+
+API versioning is the practice of managing changes to an API to ensure that existing client applications continue to function correctly even as the service evolves. It provides a structured way to introduce breaking changes without disrupting users who rely on older logic.
+
+---
+
+## Why is API Versioning Necessary?
+
+* **Backward Compatibility:** Prevents existing integrations from breaking when internal data structures or logic change.
+* **Developer Trust:** Provides a predictable environment for external developers, allowing them to migrate on their own schedule.
+* **Feature Evolution:** Enables the introduction of improved features or performance enhancements that might otherwise require a complete overhaul.
+* **Legacy Support:** Allows for the maintenance of older, stable versions while the "cutting edge" version is under active development.
+
+---
+
+## Common API Versioning Strategies
+
+### 1. URI Path Versioning
+The version number is included directly in the URL path. This is the most popular method because it is highly visible and easy to route.
+
+* **Example:** `https://api.example.com/v1/users`
+* **Pros:** Easy to implement and test; highly discoverable for developers.
+* **Cons:** Can lead to "URL bloat" and technically violates the principle that a URI should represent a unique resource, not its version.
+
+### 2. Query Parameter Versioning
+The version is specified as a parameter within the query string.
+
+* **Example:** `https://api.example.com/users?version=2`
+* **Pros:** Keeps the base URL clean; easy to set defaults if the parameter is missing.
+* **Cons:** Can be difficult to manage with complex caching layers; often seen as less "RESTful."
+
+### 3. Header Versioning (Custom Headers)
+The version is passed through a custom HTTP header.
+
+* **Example:** `X-API-Version: 3`
+* **Pros:** Maintains clean, resource-centric URLs; keeps the versioning logic out of the routing path.
+* **Cons:** Harder to test in a standard browser; requires clients to have more control over their request headers.
+
+### 4. Media Type (Accept Header) Versioning
+Also known as "Content Negotiation," this involves requesting a specific version via the `Accept` header.
+
+* **Example:** `Accept: application/vnd.example.v1+json`
+* **Pros:** Very granular; follows official REST standards.
+* **Cons:** Significantly more complex for both the server to parse and the client to implement correctly.
+
+---
+
+## Best Practices
+
+* **Avoid Breaking Changes:** Whenever possible, add new fields or endpoints rather than modifying existing ones to extend the life of a version.
+* **Clear Deprecation Policy:** Provide a clear timeline and "End of Life" (EOL) date for old versions via headers or developer portals.
+* **Semantic Versioning:** Use a structured format (e.g., v1, v2) to signal the scope of changes.
+* **Defaulting:** Be consistent about which version is served if the client provides no version information.
+
+---
+
+## Example: Node.js/Express
+
+Using URI-based versioning is a robust way to handle multiple versions in a single Express application.
+
+```js
+const express = require('express');
+const app = express();
+
+// Version 1 Logic
+const v1Router = express.Router();
+v1Router.get('/profile', (req, res) => {
+  res.json({ name: "John Doe" }); // Legacy structure
+});
+
+// Version 2 Logic
+const v2Router = express.Router();
+v2Router.get('/profile', (req, res) => {
+  res.json({ 
+    firstName: "John", 
+    lastName: "Doe", 
+    isPremium: true 
+  }); // Improved structure
+});
+
+// Mounting the versions
+app.use('/api/v1', v1Router);
+app.use('/api/v2', v2Router);
+
+app.listen(3000, () => {
+  console.log('API is running on http://localhost:3000');
+});
+```
+
+---
+
+## Conclusion
+
+API versioning is essential for building scalable and professional web services. Whether you choose URI paths for simplicity or headers for purity, the goal is always to provide a reliable contract for your users.
+
+---
+
+## References
+
+[freeCodeCamp - How to Version a REST API](https://www.freecodecamp.org/news/how-to-version-a-rest-api/)
+
+[Microsoft: Web API Design Best Practices](https://learn.microsoft.com/en-us/azure/architecture/best-practices/api-design)
