@@ -1,0 +1,166 @@
+---
+title: "Database Indexes"
+description: "An introduction to database indexes and how Hash Index, B-Tree Index, and LSM Tree Index improve query performance."
+tags: ["Database", "Indexing", "Performance", "Data Structures"]
+---
+
+## Introduction
+
+As your application grows, so does your data. Without proper optimization, querying large datasets can become slow and inefficient.
+
+This is where **database indexes** come in.
+
+An index is a data structure that improves the speed of data retrieval operations on a database table, similar to how an index in a book helps you quickly find specific information without scanning every page.
+
+However, indexes come with trade-offs in terms of storage and write performance, so understanding different types of indexes is crucial.
+
+---
+
+## What is a Database Index?
+
+A **database index** is a separate data structure that stores a mapping between keys (e.g., column values) and their corresponding rows in a table.
+
+Instead of scanning the entire table (full table scan), the database can use the index to quickly locate the required data.
+
+---
+
+## Hash Index
+
+A **Hash Index** uses a hash function to map keys to specific locations (buckets).
+
+### How it works:
+
+* The key is passed through a hash function
+* The result determines where the data is stored
+* Lookup is done by computing the same hash
+
+### Example:
+
+Searching for a user by email:
+
+* `hash("jeremy@email.com") → bucket 42`
+* Directly retrieve from bucket 42
+
+### Advantages:
+
+* Extremely fast for **exact match queries** (`=`)
+* Constant time complexity on average: **O(1)**
+
+### Limitations:
+
+* Not suitable for range queries (`>`, `<`, `BETWEEN`)
+* Hash collisions can occur (multiple keys mapping to same bucket)
+
+---
+
+## B-Tree Index
+
+A **B-Tree Index** is the most common type of index used in databases.
+
+It organizes data in a balanced tree structure, keeping keys sorted for efficient searching.
+
+### How it works:
+
+* Data is stored in sorted order
+* Tree structure allows binary-like search
+* Each node contains multiple keys and children
+
+### Example:
+
+Finding users with age between 20 and 30:
+
+* Traverse the tree
+* Efficiently locate the range
+
+### Advantages:
+
+* Supports **range queries** and sorting
+* Balanced tree ensures **O(log n)** performance
+* Works well for most general use cases
+
+### Limitations:
+
+* Slightly slower than hash index for exact matches
+* Requires rebalancing on inserts and deletes
+
+---
+
+## LSM Tree Index (Log-Structured Merge Tree)
+
+An **LSM Tree Index** is optimized for high write throughput, commonly used in modern databases and storage systems.
+
+### How it works:
+
+* Writes are first stored in memory (MemTable)
+* Periodically flushed to disk as immutable files (SSTables)
+* Background processes merge and compact these files
+
+### Example:
+
+Logging millions of events:
+
+* Writes go to memory (fast)
+* Later flushed and merged on disk
+
+### Advantages:
+
+* Excellent for **write-heavy workloads**
+* Sequential disk writes (faster than random writes)
+* Efficient for large-scale systems
+
+### Limitations:
+
+* Read operations can be slower (may check multiple files)
+* Requires compaction, which adds complexity
+
+---
+
+## When to Use Each Index
+
+| Index Type     | Best Use Case                                   |
+| -------------- | ----------------------------------------------- |
+| Hash Index     | Exact match queries (e.g., `WHERE email = ?`)   |
+| B-Tree Index   | General-purpose queries, ranges, sorting        |
+| LSM Tree Index | Write-heavy systems (logs, analytics, big data) |
+
+---
+
+## Trade-offs of Indexing
+
+While indexes improve read performance, they also introduce costs:
+
+* **Storage overhead**: Indexes take additional space
+* **Slower writes**: Inserts/updates must also update indexes
+* **Maintenance complexity**: Especially for large datasets
+
+---
+
+## Why Indexes Matter
+
+Without indexes:
+
+* Queries become slower as data grows
+* Full table scans consume more resources
+* User experience degrades significantly
+
+Indexes are essential for building **scalable and performant applications**.
+
+---
+
+## Final Thoughts
+
+Choosing the right index depends on your workload:
+
+* Heavy reads → optimize for fast lookups (B-Tree, Hash)
+* Heavy writes → consider LSM Tree
+* Mixed workloads → B-Tree is usually a safe default
+
+Understanding indexes allows you to design databases that scale efficiently while maintaining good performance.
+
+---
+
+## References
+
+[Database Index on Wikipedia](https://en.wikipedia.org/wiki/Database_index)
+
+[LSM Tree on Wikipedia](https://en.wikipedia.org/wiki/Log-structured_merge-tree)
