@@ -7,6 +7,7 @@
     "acid-principles",
     "database-indexes",
     "sql-and-nosql-databases",
+    "transaction-isolation-levels-and-concurrency-anomalies",
     "---DevOps---",
     "deployment-strategies",
     "---Frontend---",
