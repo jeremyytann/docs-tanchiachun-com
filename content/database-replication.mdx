@@ -1,0 +1,771 @@
+---
+title: "Database Replication"
+description: "A comprehensive guide to database replication, consistency models, replication strategies, conflict resolution, CRDTs, and leaderless systems."
+tags: ["Distributed Systems", "Database", "Replication", "Consistency", "CRDT"]
+---
+
+## Introduction
+
+In distributed systems, replication refers to the process of storing copies of data across multiple servers or nodes.
+
+Instead of keeping data in a single machine, replicated systems distribute data to improve:
+
+- Availability
+- Fault tolerance
+- Read scalability
+- Disaster recovery
+- Geographic latency reduction
+
+Without replication, a single machine failure could make the entire application unavailable.
+
+Modern distributed databases heavily rely on replication to ensure systems remain operational even when hardware failures, network partitions, or regional outages occur.
+
+---
+
+## Why Do We Need Replication?
+
+### 1. High Availability
+
+If one database server fails, another replica can continue serving requests.
+
+This prevents complete service downtime.
+
+### 2. Fault Tolerance
+
+Replication protects against:
+
+- Hardware failures
+- Disk corruption
+- Power outages
+- Network failures
+
+Data can still survive even if one node becomes unavailable.
+
+### 3. Read Scalability
+
+Read traffic can be distributed across replicas.
+
+Example:
+
+```text
+Primary Database → Handles writes
+Replica A → Handles reads
+Replica B → Handles reads
+Replica C → Handles reads
+```
+
+This reduces load on the primary database.
+
+### 4. Geographic Distribution
+
+Replicas placed closer to users reduce latency.
+
+Example:
+
+```text
+US Users → US Replica
+Asia Users → Asia Replica
+Europe Users → Europe Replica
+```
+
+### 5. Backup and Recovery
+
+Replicated nodes can be used for:
+
+- Backup restoration
+- Disaster recovery
+- Failover systems
+
+---
+
+## Synchronous vs Asynchronous Replication
+
+Replication can occur in different ways depending on how replicas receive updates.
+
+### Synchronous Replication
+
+In synchronous replication, the primary waits until replicas confirm the write.
+
+#### Flow
+
+```text
+Client → Primary → Replica ACK → Success Response
+```
+
+#### Advantages
+
+- Strong consistency
+- No replication lag
+- Safer failovers
+
+#### Disadvantages
+
+- Higher latency
+- Slower writes
+- Reduced availability if replicas fail
+
+### Asynchronous Replication
+
+In asynchronous replication, the primary responds immediately after committing locally.
+
+Replicas receive updates later.
+
+#### Flow
+
+```text
+Client → Primary → Success Response → Replication Later
+```
+
+#### Advantages
+
+- Faster writes
+- Better performance
+- Higher availability
+
+#### Disadvantages
+
+- Replication lag
+- Stale reads
+- Potential data loss during failover
+
+---
+
+## Consistency Models
+
+Consistency determines how replicas behave when data changes.
+
+### Strong Consistency
+
+All clients always see the latest committed data.
+
+#### Example
+
+```text
+Write X = 10
+All future reads must return 10
+```
+
+#### Characteristics
+
+- Simplifies reasoning
+- Similar to single-machine systems
+- Often slower due to coordination
+
+### Eventual Consistency
+
+Replicas may temporarily diverge.
+
+Eventually, all replicas converge to the same value.
+
+#### Example
+
+```text
+Replica A = 10
+Replica B = 8
+Eventually → Both become 10
+```
+
+#### Characteristics
+
+- High availability
+- Better performance
+- Temporary inconsistencies allowed
+
+Common in distributed NoSQL systems.
+
+### Causal Consistency
+
+Causally related operations must be observed in order.
+
+#### Example
+
+```text
+Message 1: "Hello"
+Message 2: "How are you?"
+```
+
+Clients should never see Message 2 before Message 1.
+
+#### Characteristics
+
+- Weaker than strong consistency
+- Stronger than eventual consistency
+- Useful for collaborative systems
+
+---
+
+## Dealing with Stale Reads
+
+In asynchronous replication, replicas may lag behind the primary.
+
+This causes stale reads.
+
+### Read Your Writes
+
+Users should always see their own writes.
+
+#### Example
+
+A user updates their profile picture.
+
+Immediately after refreshing, they should see the updated image.
+
+#### Solution
+
+Temporarily route reads to the primary.
+
+### Monotonic Reads
+
+A user should never see older data after seeing newer data.
+
+#### Example
+
+```text
+Read 1 → Version 5
+Read 2 → Version 3 ❌
+```
+
+#### Solution
+
+Always route the user to the same replica.
+
+### Consistent Prefix Reads
+
+Reads should preserve causal ordering.
+
+#### Example
+
+```text
+A sends payment
+B receives payment confirmation
+```
+
+Users should not see the confirmation before the payment.
+
+---
+
+## How Can We Replicate Data?
+
+Different databases replicate changes differently.
+
+### SQL Statement Replication
+
+The primary sends SQL statements directly to replicas.
+
+#### Example
+
+```sql
+UPDATE users SET balance = 100 WHERE id = 1;
+```
+
+#### Advantages
+
+- Simple
+- Human-readable
+
+#### Disadvantages
+
+- Non-deterministic queries can cause inconsistencies
+- Time-dependent functions may behave differently
+
+### Write-Ahead Log (WAL) Replication
+
+The database replicates low-level storage changes.
+
+Common in:
+
+- PostgreSQL
+- MySQL
+
+#### Advantages
+
+- Efficient
+- Accurate physical replication
+
+#### Disadvantages
+
+- Tight coupling between versions
+- Difficult for cross-database integrations
+
+### Logical Replication
+
+Replicates logical row-level changes.
+
+#### Example
+
+```text
+INSERT row
+UPDATE row
+DELETE row
+```
+
+#### Advantages
+
+- Flexible
+- Easier integration
+- Supports selective replication
+
+#### Disadvantages
+
+- Slightly more overhead
+
+### Replication Logs
+
+Replication systems maintain logs of changes.
+
+These logs allow replicas to replay operations in order.
+
+Common approaches:
+
+- WAL logs
+- Operation logs
+- Event streams
+
+---
+
+## Single Leader Replication
+
+Single leader replication uses one primary node responsible for writes.
+
+All replicas follow the leader.
+
+### Architecture
+
+```text
+          Leader
+         /   |   \
+ Replica  Replica  Replica
+```
+
+### How It Works
+
+1. Client sends write to leader
+2. Leader commits write
+3. Leader replicates changes to followers
+4. Followers update their local copies
+
+Reads may come from:
+
+- Leader
+- Replicas
+
+### Advantages
+
+- Simpler conflict handling
+- Easy consistency management
+- Widely adopted
+
+### Failure Scenarios
+
+If the leader crashes:
+
+1. A replica is promoted
+2. Clients reconnect to new leader
+3. Replication resumes
+
+Potential issues:
+
+- Data loss
+- Split brain
+- Replication gaps
+
+### Split Brain
+
+Split brain occurs when multiple nodes believe they are the leader.
+
+#### Consequences
+
+- Diverging writes
+- Data corruption
+- Inconsistent replicas
+
+#### Causes
+
+- Network partitions
+- Delayed failure detection
+
+#### Prevention
+
+- Consensus protocols
+- Leader election systems
+- Quorum-based coordination
+
+---
+
+## Multi Leader Replication
+
+Multiple leaders accept writes simultaneously.
+
+Each leader replicates changes to other leaders.
+
+### Architecture
+
+```text
+Leader A ↔ Leader B ↔ Leader C
+```
+
+### Advantages
+
+- Better geographic distribution
+- Improved availability
+- Lower write latency
+
+### Disadvantages
+
+- Write conflicts
+- Complex conflict resolution
+- Harder consistency guarantees
+
+### Conflict Avoidance
+
+Conflicts occur when multiple leaders modify the same data simultaneously.
+
+Common Strategies:
+
+- Route users consistently to same leader
+- Partition data ownership
+- Use timestamps
+- Use application-level ownership
+
+---
+
+## Multi-Leader Topologies
+
+### Circular Topology
+
+```text
+A → B → C → A
+```
+
+#### Issue
+
+Replication delays can accumulate.
+
+### Star Topology
+
+```text
+      Hub
+    /  |  \
+   A   B   C
+```
+
+#### Issue
+
+Central hub becomes bottleneck.
+
+### All-to-All Topology
+
+Every leader communicates with every other leader.
+
+#### Advantages
+
+- Faster propagation
+- Better resilience
+
+#### Disadvantages
+
+- High network complexity
+
+---
+
+## Dealing with Write Conflicts
+
+### Concurrent Writes
+
+Two users may update the same data simultaneously.
+
+#### Example
+
+```text
+User A → Name = "John"
+User B → Name = "Johnny"
+```
+
+Both updates may arrive independently.
+
+### Version Vectors
+
+Version vectors track causality between updates.
+
+#### Example
+
+```text
+Node A → Version 3
+Node B → Version 5
+```
+
+This helps determine:
+
+- Which update happened later
+- Whether updates conflict
+
+### Store Siblings
+
+Instead of overwriting conflicting versions, databases may store multiple versions.
+
+#### Example
+
+```text
+Version A
+Version B
+```
+
+Applications later resolve conflicts.
+
+Common in:
+
+- Riak
+- Dynamo-inspired systems
+
+### Automatic Merge
+
+Some systems automatically merge changes.
+
+#### Example
+
+```text
+Shopping cart additions
+```
+
+Adding items from two replicas can safely merge together.
+
+Automatic merging works best for commutative operations.
+
+### Last Write Wins (LWW)
+
+The latest timestamp overwrites older versions.
+
+#### Example
+
+```text
+Version A → Timestamp 10
+Version B → Timestamp 15
+Result → Version B wins
+```
+
+#### Advantages
+
+- Simple implementation
+
+#### Disadvantages
+
+- Can lose valid updates
+
+---
+
+## Leaderless Replication
+
+Leaderless systems allow any node to accept reads and writes.
+
+Popularized by:
+
+- Amazon Dynamo
+- Cassandra
+- Riak
+
+### How It Works
+
+Clients communicate directly with replicas.
+
+#### Example
+
+```text
+Client → Replica A
+Client → Replica B
+Client → Replica C
+```
+
+No single leader exists.
+
+### Quorums
+
+Leaderless systems commonly use quorum reads and writes.
+
+#### Variables
+
+```text
+N = Total replicas
+W = Write quorum
+R = Read quorum
+```
+
+Strong overlap condition:
+
+```text
+R + W > N
+```
+
+#### Are Quorums Strongly Consistent?
+
+Not always.
+
+Even with quorum systems:
+
+- Clock skew
+- Network delays
+- Sloppy quorums
+- Hinted handoff
+
+can still produce stale reads.
+
+Quorums improve consistency but do not guarantee perfect linearizability.
+
+#### What Happens When Writes Fail?
+
+If some replicas fail during writes:
+
+- Partial writes may occur
+- Retry mechanisms activate
+- Hinted handoff may temporarily store writes elsewhere
+
+The system later repairs inconsistencies.
+
+### Anti-Entropy
+
+Anti-entropy mechanisms synchronize replicas.
+
+Replicas compare data periodically and repair inconsistencies.
+
+Comparison trees help identify data divergence efficiently.
+
+Merkle trees are a common implementation.
+
+#### Merkle Trees
+
+Merkle trees efficiently compare replica data.
+
+Instead of comparing entire datasets:
+
+1. Compare hashes
+2. Identify differing branches
+3. Synchronize only changed data
+
+This significantly reduces bandwidth.
+
+### Sloppy Quorums
+
+Sloppy quorums allow writes to temporary nodes when intended replicas are unavailable.
+
+#### Advantages
+
+- Higher availability
+
+#### Disadvantages
+
+- Weaker consistency
+- More complex reconciliation
+
+---
+
+## CRDTs
+
+CRDT stands for **Conflict-Free Replicated Data Type**.
+
+CRDTs are data structures designed to merge automatically without conflicts.
+
+They guarantee eventual consistency.
+
+### Operational CRDTs
+
+Operational CRDTs replicate operations between nodes.
+
+#### Example
+
+```text
+Add item
+Remove item
+Increment counter
+```
+
+#### Advantages
+
+- Smaller network payloads
+- Efficient synchronization
+- Real-time collaboration support
+
+#### Disadvantages
+
+- Requires reliable operation ordering
+- More complex implementation
+
+### State-Based CRDTs
+
+State-based CRDTs periodically exchange full state.
+
+#### Example
+
+```text
+Replica A sends entire object state
+```
+
+Replicas merge states deterministically.
+
+### Gossip Protocol
+
+Nodes randomly exchange state information.
+
+Eventually, all nodes converge.
+
+#### Characteristics
+
+- Decentralized
+- Fault tolerant
+- Scalable
+
+#### Advantages
+
+- Simpler implementation
+- Works well with unreliable networks
+
+#### Disadvantages
+
+- Larger bandwidth usage
+- Slower convergence
+
+### Sequence CRDTs
+
+Sequence CRDTs support collaborative editing.
+
+#### Example Applications
+
+- Google Docs-like editors
+- Collaborative note systems
+
+They allow concurrent insertions without conflicts.
+
+---
+
+## Conclusion
+
+Replication is one of the most important concepts in distributed systems.
+
+It enables:
+
+- High availability
+- Scalability
+- Fault tolerance
+- Geographic distribution
+
+However, replication also introduces major challenges:
+
+- Consistency trade-offs
+- Replication lag
+- Write conflicts
+- Network partitions
+- Failure recovery complexity
+
+Different replication models solve different problems:
+
+| Model         | Strength             | Weakness               |
+| ------------- | -------------------- | ---------------------- |
+| Single Leader | Simpler consistency  | Leader bottleneck      |
+| Multi Leader  | Better availability  | Conflict resolution    |
+| Leaderless    | High fault tolerance | Complex reconciliation |
+
+Understanding replication is essential for designing modern distributed databases and scalable systems.
+
+---
+
+## References
+
+[Designing Data-Intensive Applications — Martin Kleppmann](https://github.com/aasthas2022/SDE-Interview-and-Prep-Roadmap/blob/main/System%20Design/Resources/Designing%20Data%20Intensive%20Applications%20by%20Martin%20Kleppmann.pdf)
