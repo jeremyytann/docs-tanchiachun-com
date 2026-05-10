@@ -1,0 +1,196 @@
+---
+title: "Sieve of Eratosthenes"
+description: "An explanation of the Sieve of Eratosthenes algorithm, a fast and efficient method for finding all prime numbers up to a given number."
+tags: ["Algorithms", "Prime Numbers", "Data Structures"]
+---
+
+## Introduction
+
+Have you ever wondered how computers efficiently find prime numbers?
+
+One of the most famous and efficient algorithms for generating prime numbers is the **Sieve of Eratosthenes**.
+
+The Sieve of Eratosthenes is an algorithm used to find all prime numbers up to a given number `n`.
+
+Instead of checking each number individually for primality, the algorithm works by repeatedly marking the multiples of prime numbers as non-prime.
+
+---
+
+## What is a Prime Number?
+
+A **prime number** is a number greater than `1` that has only two divisors:
+
+* `1`
+* Itself
+
+### Examples:
+
+* `2` → Prime
+* `3` → Prime
+* `4` → Not Prime (`2 × 2`)
+* `5` → Prime
+
+---
+
+## How the Sieve of Eratosthenes Works
+
+The algorithm follows these steps:
+
+1. Create a list of numbers from `2` to `n`
+2. Start with the first unmarked number (`2`)
+3. Mark all multiples of that number as non-prime
+4. Move to the next unmarked number
+5. Repeat until you reach `√n`
+
+The remaining unmarked numbers are prime numbers.
+
+---
+
+## Step-by-Step Example
+
+Let’s find all prime numbers up to `20`.
+
+### Initial Numbers
+
+```text
+2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20
+```
+
+### Step 1: Start with 2
+
+Mark all multiples of `2` (except `2` itself):
+
+```text
+2 3 X 5 X 7 X 9 X 11 X 13 X 15 X 17 X 19 X
+```
+
+### Step 2: Move to 3
+
+Mark all multiples of `3`:
+
+```text
+2 3 X 5 X 7 X X X 11 X 13 X X X 17 X 19 X
+```
+
+### Step 3: Move to 5
+
+Since `5 × 5 > 20`, we can stop.
+
+The remaining unmarked numbers are:
+
+```text
+2 3 5 7 11 13 17 19
+```
+
+These are all the prime numbers up to `20`.
+
+---
+
+## Time Complexity
+
+The Sieve of Eratosthenes is very efficient.
+
+### Complexity:
+
+```text
+O(n log log n)
+```
+
+This is much faster than checking each number individually for primality.
+
+---
+
+## JavaScript Implementation
+
+```javascript
+function sieveOfEratosthenes(n) {
+    const isPrime = new Array(n + 1).fill(true);
+
+    isPrime[0] = false;
+    isPrime[1] = false;
+
+    for (let i = 2; i * i <= n; i++) {
+        if (isPrime[i]) {
+            for (let j = i * i; j <= n; j += i) {
+                isPrime[j] = false;
+            }
+        }
+    }
+
+    const primes = [];
+
+    for (let i = 2; i <= n; i++) {
+        if (isPrime[i]) {
+            primes.push(i);
+        }
+    }
+
+    return primes;
+}
+
+console.log(sieveOfEratosthenes(20));
+```
+
+### Output:
+
+```text
+[2, 3, 5, 7, 11, 13, 17, 19]
+```
+
+---
+
+## Why Start from `i * i`?
+
+When processing a number `i`, smaller multiples of `i` would have already been marked by previous prime numbers.
+
+### Example:
+
+For `5`:
+
+* `5 × 2 = 10` → Already marked by `2`
+* `5 × 3 = 15` → Already marked by `3`
+* `5 × 4 = 20` → Already marked by `2`
+
+So we can safely start from:
+
+```text
+5 × 5 = 25
+```
+
+This optimization makes the algorithm more efficient.
+
+---
+
+## Advantages
+
+* Very efficient for finding many prime numbers
+* Easy to understand and implement
+* Faster than repeated primality testing
+* Commonly used in competitive programming and mathematics
+
+---
+
+## Limitations
+
+* Requires extra memory for the boolean array
+* Not suitable for extremely large ranges without optimization
+
+For very large ranges, techniques like the **Segmented Sieve** are often used.
+
+---
+
+## Final Thoughts
+
+The Sieve of Eratosthenes is one of the classic algorithms in computer science and mathematics.
+
+It demonstrates how preprocessing and elimination techniques can dramatically improve performance.
+
+If you are learning algorithms, competitive programming, or number theory, this is definitely an algorithm worth mastering.
+
+---
+
+## References
+
+[Sieve of Eratosthenes on Wikipedia](https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes)
+
+[Prime Numbers on Wikipedia](https://en.wikipedia.org/wiki/Prime_number)

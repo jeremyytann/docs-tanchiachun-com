@@ -3,6 +3,8 @@
   "pages": [
     "---Introduction---",
     "index",
+    "---Algorithms---",
+    "the-sieve-of-eratosthenes",
     "---Database---",
     "acid-principles",
     "database-indexes",
