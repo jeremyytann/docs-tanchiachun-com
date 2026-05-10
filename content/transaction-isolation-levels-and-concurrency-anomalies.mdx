@@ -6,243 +6,542 @@ tags: ["Database", "Isolation Levels", "Concurrency", "Transactions"]
 
 ## Introduction
 
-When multiple transactions run at the same time, databases must ensure they don’t interfere with each other in ways that corrupt data.
+Modern databases allow many transactions to run concurrently. Without proper coordination, concurrent reads and writes can lead to:
 
-This is where **transaction isolation** comes in.
+- Inconsistent reads
+- Lost updates
+- Corrupted business logic
+- Violated constraints
 
-Isolation defines how and when the changes made by one transaction become visible to others. Different isolation levels provide different guarantees, and allow different types of anomalies.
+This is where **transaction isolation** and **concurrency control** become critical.
 
----
+**Isolation defines:** how and when the changes made by one transaction become visible to others. 
 
-## Isolation Levels Overview
+Different isolation levels provide different guarantees, and allow different types of anomalies, balancing:
 
-Isolation levels determine how strictly a database prevents interference between concurrent transactions.
-
-From weaker to stronger:
-
-* **Read Committed Isolation**
-* **Snapshot Isolation**
-* **Serializable Isolation (Serial Execution)**
-
-Each level balances **performance vs correctness**.
+- correctness
+- performance
+- concurrency
 
 ---
 
-## Read Committed Isolation
+## Concurrency Anomalies
 
-**Read Committed Isolation** ensures that a transaction can only read data that has already been committed.
+Before understanding isolation levels, it helps to understand the problems databases are trying to prevent.
 
-### What it prevents:
+### 1. Dirty Read
 
-* Dirty reads (reading uncommitted data)
+A **dirty read** happens when a transaction reads data that has been written by another transaction that **has not committed yet**.
 
-### What can still happen:
+#### Example:
 
-* Non-repeatable reads
-* Phantom reads
+```sql
+-- Transaction A
+UPDATE accounts SET balance = 50 WHERE id = 1;
+-- not committed yet
 
-### Example:
+-- Transaction B
+SELECT balance FROM accounts WHERE id = 1;
+-- reads 50
+```
 
-Transaction A reads a value.
-Transaction B updates and commits it.
-Transaction A reads again and sees a different value.
+If Transaction A later rolls back, Transaction B has read invalid data.
 
----
+#### Why it is dangerous:
 
-## Dirty Reads
+- The uncommitted data might be **rolled back**
+- Leads to reading invalid or inconsistent data
 
-A **dirty read** occurs when a transaction reads data that has been written by another transaction **but not yet committed**.
+#### How databases prevent it:
 
-### Why it’s dangerous:
+- Do **not expose uncommitted data** to other transactions
+- Return the **last committed version** of the row instead (MVCC in many systems)
 
-* The uncommitted data might be **rolled back**
-* Leads to reading invalid or inconsistent data
+#### Prevented by:
 
-### Example:
+- **Read Committed Isolation** and stronger isolation levels
 
-* Transaction A updates price to 50 (not committed)
-* Transaction B reads price = 50
-* Transaction A rolls back → actual value was never 50
 
-### How databases prevent it:
+### 2. Dirty Write
 
-* Do **not expose uncommitted data** to other transactions
-* Return the **last committed version** of the row instead (MVCC in many systems)
+A **dirty write** occurs when two transactions update the same row concurrently before either commits, and one overwrites the other before either has committed.
 
-### In practice:
+#### Example:
 
-* Prevented by **Read Committed Isolation** and stronger isolation levels
+```sql
+-- Transaction A
+UPDATE accounts SET balance = 100 WHERE id = 1;
 
----
+-- Transaction B
+UPDATE accounts SET balance = 200 WHERE id = 1;
+```
 
-## Dirty Writes
+Without proper locking, one update may silently overwrite the other.
 
-A **dirty write** happens when two concurrent transactions modify the **same row** without proper coordination, and one overwrites the other before either has committed.
+#### Why it is dangerous:
 
-### Why it’s dangerous:
+- Causes lost updates
+- Final result depends on timing (race condition)
+- Violates data consistency
 
-* One transaction’s changes can be silently lost
-* Final state depends on timing (race condition)
+#### How databases prevent it:
 
-### Example:
+- **Row-level write locks** - only one transaction can modify a row at a time.
+- **Two-Phase Locking** (2PL) - ensures that locks are held until commit/rollback.
 
-* Transaction A updates balance to 100 (not committed yet)
-* Transaction B updates balance to 200
-* One commit overwrites the other → lost update
-
-### How databases prevent it:
-
-* **Row-level locks** (write locks) - only one transaction can modify a row at a time.
-
-### Trade-offs:
+#### Trade-offs:
 
 * Can lead to **blocking**
 * May cause **deadlocks** (databases resolve them by aborting one transaction)
 
----
 
-## Snapshot Isolation
+### 3. Non-Repeatable Read
 
-**Snapshot Isolation (SI)** provides each transaction with a consistent snapshot of the database at the time it starts.
+A **non-repeatable read** occurs when the same query returns different results within the same transaction.
 
-### How it works:
+#### Example
 
-* Reads come from a **snapshot** (a past, consistent state)
-* Typically implemented via **MVCC (Multi-Version Concurrency Control)**
-* Each row keeps multiple versions with transaction timestamps/IDs
-* A transaction only sees versions **committed before it started**
+```sql
+-- Transaction A
+SELECT balance FROM accounts WHERE id = 1;
+-- returns 100
 
-### What it prevents:
-
-* Dirty reads
-* Non-repeatable reads
-
-### What can still happen:
-
-* **Write skew**
-
-### Example (inconsistent read across accounts):
-
-* Invariant: total balance across accounts must always be **$1,000,000**
-* A long-running read transaction scans accounts **A → B → C → D**
-* Meanwhile, another transaction transfers money from **E → A** and commits
-
-Result:
-
-* The reader may see **A with the new balance**, but **B/C/D from the old snapshot**
-* This can look like a temporary **$100,000 discrepancy** (mixed states)
-
-> In few words: under SI, **we read a snapshot, not the live table**.
-
-### Why this happens:
-
-* The reader’s snapshot is fixed at start time
-* Concurrent commits after the snapshot aren’t visible to that transaction
-* If the read is not truly snapshot-consistent across all accessed rows (engine/plan specifics), you can observe **apparent inconsistencies**
-
-### Notes on implementation details:
-
-* **MVCC** is the key mechanism for SI (versioned rows with transaction IDs)
-* **Write-Ahead Logging (WAL)** ensures **durability and atomicity**, but it is **not what provides snapshot isolation**
-
----
-
-## Write Skew
-
-**Write Skew** occurs when two transactions read the same data but update different parts of it, leading to an invalid state.
-
-### Example:
-
-Two doctors are required to be on call.
-
-* Transaction A checks: 2 doctors available → removes Doctor 1
-* Transaction B checks: 2 doctors available → removes Doctor 2
-
-Both commit successfully → result: **0 doctors on call ❌**
-
-This happens because:
-
-* Both transactions read the same snapshot
-* No direct write conflict occurs
-
-### Why locks don’t always help:
-
-* Locks typically apply to **rows being modified**
-* In write skew, transactions modify **different rows**
-* So no conflict is detected, even though a **global constraint is violated**
-
-### Solution:
-
-* Lock based on **conditions**, not just rows
-* Example: lock all rows that satisfy “doctors on call”
-* Or use **Serializable isolation** to detect and prevent the anomaly
-
----
-
-## Serializable Isolation (Serial Execution)
-
-**Serializable isolation** is the strongest level.
-
-It guarantees that transactions behave as if they were executed **one after another**, even if they actually run concurrently.
-
-### What it prevents:
-
-* Dirty reads
-* Non-repeatable reads
-* Phantom reads
-* Write skew
-
-### Trade-off:
-
-* Slower performance due to strict coordination
-* May abort transactions to maintain correctness
-
----
-
-## Phantom Reads
-
-A **phantom read** happens when a query returns a different set of rows when re-executed.
-
-### Example:
-
-Transaction A:
-SELECT * FROM orders WHERE amount > 100;
-
-Transaction B:
-INSERT INTO orders (amount) VALUES (150);
+-- Transaction B
+UPDATE accounts SET balance = 200 WHERE id = 1;
 COMMIT;
 
-Transaction A runs the same query again and now sees an extra row → **phantom**
+-- Transaction A
+SELECT balance FROM accounts WHERE id = 1;
+-- now returns 200
+```
 
----
+#### Why it matters
 
-## Phantom Writes (Write Skew)
+The transaction cannot rely on previously read values remaining stable.
+
+#### Prevented by
+
+- Snapshot Isolation
+- Repeatable Read
+- Serializable Isolation
+
+
+### 4. Phantom Read
+
+A phantom read occurs when a query returns a different set of rows during the same transaction.
+
+#### Example:
+
+```sql
+-- Transaction A
+SELECT * FROM orders WHERE amount > 1000;
+-- returns 5 rows
+
+-- Transaction B
+INSERT INTO orders VALUES (..., 2000);
+COMMIT;
+
+-- Transaction A
+SELECT * FROM orders WHERE amount > 1000;
+-- now returns 6 rows
+```
+
+The additional row is called a phantom row.
+
+#### Why it matters
+
+Even if existing rows are unchanged, the result set itself changes.
+
+#### Prevented by
+
+- Serializable isolation
+- Index range locking
+
+
+### 5. Write Skew
+
+A **write skew** occurs when two concurrent transactions read overlapping data and then update different rows based on those reads.
+
+This is one of the most important anomalies allowed under Snapshot Isolation.
+
+#### Example:
+
+Assume: At least one doctor must remain on-call.
+
+```sql
+-- Transaction A
+SELECT * FROM doctors WHERE on_call = true;
+-- sees Dr. Alice and Dr. Bob
+
+-- Transaction B
+SELECT * FROM doctors WHERE on_call = true;
+-- also sees Dr. Alice and Dr. Bob
+```
+
+Then:
+
+```sql
+-- Transaction A
+UPDATE doctors SET on_call = false WHERE name = 'Alice';
+
+-- Transaction B
+UPDATE doctors SET on_call = false WHERE name = 'Bob';
+```
+
+Both transactions commit successfully.
+
+**Final result**: No doctors are on call, violating the constraint.
+
+#### Why it happens:
+
+- Both transactions read the same snapshot
+- They update different rows based on that snapshot
+- No direct write-write conflict occurs
+
+#### Why locks don’t always help:
+
+- Locks typically apply to **rows being modified**
+- In write skew, transactions modify **different rows**
+- So no conflict is detected, even though a **global constraint is violated**
+
+#### Solution:
+
+- Lock based on **conditions**, not just rows
+- Example: lock all rows that satisfy "doctors on call"
+
+#### Prevented by:
+
+- Serializable isolation
+- Strict Two-Phase Locking (2PL)
+
+### 6. Phantom Writes (Write Skew)
 
 A special case related to phantoms is **phantom writes**, where two transactions insert new rows that conflict with each other.
 
-### Situation:
+#### Situation:
 
 * Two transactions run concurrently
 * Both check for a condition (e.g., "no booking exists for this time slot")
 * Since the row does not yet exist, **no locks are held**
 
-### What happens:
+#### What happens:
 
 * Both transactions believe the insert is valid
 * Both insert new rows
 * Result: constraint is violated (e.g., double booking) ❌
 
-### Why it happens:
+#### Why it happens:
 
 * The conflicting data **doesn’t exist yet**
 * Locks cannot be applied to something that isn’t there
 * Each transaction works on its own view of the data
 
-### Solution: Materialize Conflicts
+#### Solution: Materialize Conflicts
 
 * Pre-create rows representing potential conflicts
 * Example: create all available meeting room slots in advance
 * Transactions then **lock existing rows instead of inserting new ones**
+
+---
+
+## Isolation Levels
+
+**Isolation levels** define how strongly a database protects transactions from concurrency anomalies.
+
+From weaker to stronger:
+
+- **Read Committed Isolation**
+- **Snapshot Isolation / Repeatable Read**
+- **Serializable Isolation (Serial Execution)**
+
+Higher isolation levels:
+
+- Improves correctness
+- Reduces concurrency
+- Usually increases locking or coordication overhead
+
+---
+
+## Read Committed Isolation
+
+**Read Committed Isolation** ensures a transaction only sees committed data.
+
+### Prevents:
+
+- Dirty reads (reading uncommitted data)
+
+### Still allows:
+
+- Non-repeatable reads
+- Phantom reads
+- Write skew
+
+### How it works:
+
+Most databases implement Read Committed using:
+
+- MVCC (Multi-Version Concurrency Control) to provide a consistent view of committed data
+- Row-level locks for writes to prevent dirty writes
+
+Each statement sees the latest committed data at the time it executes, but different statements within the same transaction may see different data if other transactions commit in between.
+
+### Example:
+
+```sql
+-- Transaction A
+SELECT balance FROM accounts WHERE id = 1;
+-- returns 100
+
+-- Transaction B
+UPDATE accounts SET balance = 200 WHERE id = 1;
+COMMIT;
+
+-- Transaction A
+SELECT balance FROM accounts WHERE id = 1;
+-- now returns 200
+```
+
+The second read sees newer committed data.
+
+---
+
+## Snapshot Isolation (SI)
+
+**Snapshot Isolation** provides each transaction with a consistent snapshot of the database at the time it starts.
+
+### Core Idea
+
+Instead of reading live data, the transactions read a historical snapshot.
+
+This is usually implemented using:
+
+- MVCC
+- Transaction timestamps
+- Row versions
+
+### How MVCC works:
+
+Databases maintain multiple versions of rows.
+
+Each version contains metadata such as:
+
+- The transaction ID that created it
+- The transaction ID that deleted it (if applicable)
+- Commit timestamps
+- Visibility rules determine which version a transaction sees based on its snapshot timestamp.
+
+When a transaction starts,
+- It receives a snapshot timestamp
+- It only sees rows committed before that timestamp
+
+This avoids many read locks and improves concurrency.
+
+### Prevents:
+
+- Dirty reads (reading uncommitted data)
+- Non-repeatable reads
+
+### Still allows:
+
+- Write skew
+- Some phantom-like anomalies (depending on implementation)
+
+### Example (inconsistent read across accounts):
+
+```sql
+-- Transaction A starts
+SELECT balance FROM accounts WHERE id = 1;
+-- returns 100
+
+-- Transaction B
+UPDATE accounts SET balance = 200 WHERE id = 1;
+COMMIT;
+
+-- Transaction A
+SELECT balance FROM accounts WHERE id = 1;
+-- still returns 100
+```
+
+In few words: under SI, **we read a snapshot, not the live table**.
+
+### Notes on implementation details:
+
+- **MVCC** is the key mechanism for SI (versioned rows with transaction IDs)
+- **Write-Ahead Logging (WAL)** ensures **durability and atomicity**, but it is **not what provides snapshot isolation**
+
+---
+
+## Serializable Isolation
+
+**Serializable isolation** is the strongest standard isolation level.
+
+It guarantees that transactions behave as if they were executed **one after another**, even if they actually run concurrently.
+
+### What it prevents:
+
+- Dirty reads
+- Dirty writes
+- Non-repeatable reads
+- Phantom reads
+- Write skew
+
+Serializable isolation provides the highest correctness guarantee.
+
+### Trade-off:
+
+Serializable isolation may:
+
+- Reduce concurrency
+- Increase locking
+- Increase transaction aborts
+- Cause contention under heavy workloads
+
+However, it is essential for:
+
+- Financial systems
+- Inventory systems
+- Critical consistency constraints
+
+---
+
+## Two-Phase Locking (2PL)
+
+One classical way databases achieve serializable behavior is through **Two-Phase Locking**.
+
+2PL is a locking protocol that controls how locks are acquired and released.
+
+### The two phases:
+
+1. **Growing Phase**: A transaction may acquire locks but cannot release any locks.
+2. **Shrinking Phase**: Once a transaction releases its first lock, it cannot acquire any new locks.
+
+This guarantees a consistent locking order, preventing cycles and ensuring serializability.
+
+### Example:
+
+```sql
+-- Transaction A
+BEGIN;
+
+SELECT * FROM accounts WHERE id = 1;
+-- shared lock acquired
+
+UPDATE accounts SET balance = 200 WHERE id = 1;
+-- exclusive lock acquired
+
+COMMIT;
+-- locks released
+```
+
+Locks are held until the shrinking phase begins.
+
+### Strict Two-Phase Locking (Strict 2PL)
+
+Most databases actually use **Strict Two-Phase Locking**.
+
+Under Strict 2PL:
+
+- Exclusive locks are held until commit/rollback
+- Prevents dirty reads and dirty writes
+- Improves recoverability
+
+This is commonly used in:
+
+- SQL Server
+- Traditional relational database systems
+
+### Advantages of 2PL:
+
+- Strong consistency guarantees
+- Prevents many concurrency anomalies
+- Ensures serializability
+
+### Disadvantages of 2PL:
+
+- Blocking, transactions may wait for locks
+- Deadlocks, two transactions may wait for each other forever.
+- Reduced concurrency, heavy locking reduces throughput.
+
+Example:
+
+```text
+Transaction A holds Row 1, waiting for Row 2
+Transaction B holds Row 2, waiting for Row 1
+```
+
+Databases detect deadlocks and abort one transaction.
+
+---
+
+## Index Range Locking
+
+To prevent phantom reads, some databases use **index range locking**.
+
+This allows transactions to lock a range of rows based on an index, preventing other transactions from inserting new rows that would satisfy the same query conditions.
+
+### The problem with row locking alone:
+
+Suppose a transaction executes:
+
+```sql
+SELECT * FROM orders WHERE amount > 1000;
+```
+
+Even if all existing rows are locked:
+
+- Another transaction can still insert a new row with `amount = 2000`
+- The next query sees an additional row
+- Phantom read occurs
+
+### How index range locking works:
+
+Instead of locking only rows:
+
+The database locks:
+
+- Existing rows
+- The gaps between indexed values
+- Entire index ranges
+
+This prevents inserts into the protected range.
+
+### Example:
+
+Assume an index on `amount`.
+
+Transaction A:
+
+```sql
+SELECT * FROM orders
+WHERE amount BETWEEN 1000 AND 5000
+FOR UPDATE;
+```
+
+The database may lock:
+
+- Rows inside the range
+- Gaps within the index range
+
+Now Transaction B cannot insert:
+
+```sql
+INSERT INTO orders(amount) VALUES (3000);
+```
+
+until Transaction A commits.
+
+### Why it matters:
+
+Index range locking is critical for:
+
+- Serializable isolation
+- Preventing phantom reads
+- Enforcing business constraints safely
+
+Without range locking:
+
+- Row-level locking alone is insufficient
+- New rows can bypass existing locks
 
 ---
 
@@ -307,31 +606,70 @@ Materializing conflicts is a design pattern to prevent write skew and phantom wr
 
 | Isolation Level    | Dirty Reads | Non-repeatable Reads | Phantom Reads | Write Skew  |
 | ------------------ | ----------- | -------------------- | ------------- | ----------- |
-| Read Committed Isolation     | ❌ Prevented | ❌ Possible           | ❌ Possible    | ❌ Possible  |
-| Snapshot Isolation | ❌ Prevented | ❌ Prevented          | ❌ Possible    | ❌ Possible  |
+| Read Committed Isolation     | ✅ Prevented | ❌ Possible           | ❌ Possible    | ❌ Possible  |
+| Snapshot Isolation | ✅ Prevented | ✅ Prevented          | ❌ Possible    | ❌ Possible  |
 | Serializable Isolation       | ✅ Prevented | ✅ Prevented          | ✅ Prevented   | ✅ Prevented |
 
 ---
 
-## Why This Matters
+## MVCC vs Lock-Based Concurrency Control
 
-Without proper isolation:
+| Aspect | MVCC | Lock-Based |
+|---|---|---|
+| Read Behavior | Reads snapshots | Reads may wait for locks |
+| Reader/Writer Blocking | Minimal | Common |
+| Write Conflicts | Detected during commit or updates | Prevented through locks |
+| Performance | Excellent for read-heavy systems | Good for controlled write-heavy systems |
+| Storage Usage | Higher due to row versions | Lower |
+| Deadlocks | Less common | More common |
+| Phantom Prevention | Requires Serializable mechanisms | Uses range/index locks |
+| Complexity | Higher implementation complexity | Easier conceptual model |
 
-* Data can become inconsistent
-* Business rules can be violated
-* Bugs become hard to detect and reproduce
+---
 
-Understanding isolation levels helps you:
+## Real Database Examples
 
-* Choose the right database configuration
-* Avoid subtle concurrency bugs
-* Design safer systems
+| Database | Main Concurrency Model |
+|---|---|
+| PostgreSQL | MVCC |
+| MySQL InnoDB | MVCC + Locking |
+| Oracle | MVCC |
+| SQL Server | Primarily Lock-Based with MVCC options |
+
+Most modern databases combine:
+
+- MVCC for high concurrency
+- Locking for conflict resolution and serializability
+
+---
+
+## Choosing Between MVCC and Locking
+
+The best approach depends on workload characteristics.
+
+### MVCC is ideal for:
+
+- Read-heavy applications
+- APIs with many concurrent users
+- Systems prioritizing responsiveness
+
+### Locking is ideal for:
+
+- Strong consistency requirements
+- High-conflict transactional systems
+- Workloads with frequent write contention
 
 ---
 
 ## Final Thoughts
 
-There is no “best” isolation level, only trade-offs.
+MVCC and lock-based concurrency control solve the same problem: 
+
+- safely executing concurrent transactions.
+
+Their trade-offs differ significantly.
+
+There is no "best" isolation level, only trade-offs.
 
 * Use **Read Committed Isolation** for performance with basic safety
 * Use **Snapshot Isolation** for better consistency with high concurrency
