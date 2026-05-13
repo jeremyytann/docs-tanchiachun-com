@@ -8,6 +8,7 @@
     "---Database---",
     "acid-principles",
     "database-indexes",
+    "database-partitioning",
     "database-replication",
     "sql-and-nosql-databases",
     "transaction-isolation-levels-and-concurrency-anomalies",

@@ -1,0 +1,496 @@
+---
+title: "Database Partitioning and Distributed Systems"
+description: "A comprehensive overview of database partitioning, replication coordination, consensus algorithms, and coordination services in distributed systems."
+tags: ["Database", "Distributed Systems", "Partitioning", "Consensus", "Raft", "Zookeeper"]
+---
+
+## Introduction
+
+As applications grow, databases eventually reach the limits of what a single machine can handle.
+
+Common bottlenecks include:
+
+- CPU limitations
+- Memory exhaustion
+- Disk throughput
+- Network bandwidth
+- Availability risks
+
+At small scale, a single database server is often enough. However, large systems such as social media platforms, ecommerce systems, and financial services need to distribute data across multiple machines.
+
+This introduces an entirely new category of engineering challenges:
+
+- How do we split data?
+- How do we keep replicas consistent?
+- How do distributed transactions work?
+- How do systems remain fault tolerant?
+
+This is where distributed systems concepts such as partitioning, consensus algorithms, and coordination services become essential.
+
+---
+
+## What is Partitioning?
+
+**Partitioning (or sharding)** is the process of splitting a large dataset into smaller pieces called partitions.
+
+Each partition is stored on a different node.
+
+### Goals of Partitioning
+
+- Horizontal scalability
+- Improved throughput
+- Reduced storage pressure on a single machine
+- Better fault isolation
+
+Instead of one machine handling all reads and writes, multiple machines share the workload.
+
+However, it introduces complexity in querying, consistency, and coordination.
+
+---
+
+## Challenges of Partitioning
+
+Partitioning improves scalability, but it also introduces complexity.
+
+### Common Challenges
+
+- Cross-partition joins become expensive
+- Distributed transactions become harder
+- Rebalancing requires moving large amounts of data
+- Secondary indexes become difficult to maintain
+- Hot partitions may overload individual nodes
+
+Once data is distributed, many operations that were simple in a single-node database become coordination problems.
+
+---
+
+## Range-Based Partitioning
+
+In range-based partitioning, data is divided based on a continuous range of keys.
+
+### Example
+
+- A–F → Node 1
+- G–M → Node 2
+- N–Z → Node 3
+
+### Advantages
+
+- Efficient range queries
+- Simple lookup logic
+- Good for ordered data
+
+### Disadvantages
+
+- Uneven traffic distribution
+- Hotspot risk
+- Rebalancing can be expensive
+
+---
+
+## Hash-Based Partitioning
+
+Hash-based partitioning uses a hash function to distribute data evenly across partitions.
+
+### Example
+
+```text
+partition = hash(key) % N
+```
+
+### Advantages
+
+- More even distribution
+- Reduces hotspot problems
+- Predictable partition placement
+
+### Disadvantages
+
+- Poor support for range queries
+- Repartitioning becomes expensive when the number of nodes changes
+
+Hash partitioning is commonly used in distributed systems because it balances data more evenly than range partitioning.
+
+---
+
+## Partition Rebalancing
+
+As systems grow, partitions must be redistributed to maintain balance.
+
+This process is called **rebalancing**.
+
+### Rebalancing Happens When
+
+- Node addition/removal
+- Uneven load distribution
+- Storage limits reached
+
+### Challenges
+
+- Large data transfers
+- Temporary performance degradation
+- Maintaining consistency during migration
+
+---
+
+## Consistent Hashing
+
+Consistent hashing minimizes data movement during scaling operations.
+
+Instead of directly mapping keys to machines, both nodes and keys are mapped onto a logical hash ring.
+
+### How It Works
+
+- Keys are hashed onto a ring
+- Nodes are also hashed onto the ring
+- Each key belongs to the next node clockwise
+
+### Benefits
+
+- Minimal data movement when nodes change
+- Better scalability
+- Reduced operational overhead
+
+---
+
+## Fixed Number of Partitions
+
+Many systems use a fixed number of logical partitions.
+
+Instead of moving individual keys between machines:
+
+- Partitions stay fixed
+- Partitions are reassigned to different nodes
+
+### Benefits
+
+- Easier rebalancing
+- More predictable scaling
+- Simpler operational management
+
+This design is commonly used in systems like Kafka.
+
+---
+
+## Dynamic Partitioning
+
+Dynamic partitioning automatically adjusts partition sizes based on workload.
+
+### Examples
+
+- Splitting overloaded partitions
+- Merging underutilized partitions
+- Redistributing hot data
+
+### Benefits
+
+- Adaptive scaling
+- Better resource utilization
+
+### Trade-offs
+
+- More operational complexity
+- Requires monitoring and automation
+
+Dynamic partitioning helps systems adapt to changing traffic patterns over time.
+
+---
+
+## Secondary Indexes
+
+Secondary indexes allow querying data using attributes other than the primary key.
+
+In distributed databases, indexes become more complicated because data is spread across multiple partitions.
+
+### Local Secondary Indexes
+
+Local secondary indexes exist within the same partition as the data.
+
+#### Advantages
+
+- Faster partition-local queries
+- Easier consistency management
+
+#### Limitations
+
+- Cannot efficiently query across all partitions
+
+### Global Secondary Indexes
+
+Global secondary indexes span multiple partitions.
+
+#### Advantages
+
+- Allow global querying
+- Support flexible access patterns
+
+#### Disadvantages
+
+- Expensive distributed updates
+- More coordination overhead
+- Increased consistency complexity
+
+Maintaining global indexes in distributed systems is often one of the hardest engineering problems.
+
+---
+
+## Distributed Transactions vs Replication
+
+Distributed systems typically deal with two separate coordination problems:
+
+### 1. Replication
+
+Keeping replicas consistent across nodes.
+
+### 2. Distributed Transactions
+
+Ensuring atomic operations across multiple partitions or services.
+
+These problems are related, but they are solved using different mechanisms.
+
+---
+
+## Two-Phase Commit (2PC)
+
+Two-phase commit is a protocol used to ensure atomicity across multiple nodes.
+
+### Phase 1: Prepare
+
+A coordinator asks all participating nodes whether they can commit the transaction.
+
+Each participant replies with:
+
+- Yes (prepared)
+- No (abort)
+
+### Phase 2: Commit
+
+If all participants agree:
+
+- Coordinator sends commit
+
+Otherwise:
+
+- Coordinator aborts the transaction
+
+### Limitations with 2PC
+
+Although 2PC guarantees atomicity, it introduces several issues.
+
+- Coordinator becomes a single point of failure
+- Transactions may block indefinitely
+- Multiple network round trips increase latency
+- Poor scalability under heavy traffic
+
+Because of these limitations, distributed transactions are often avoided in highly scalable systems.
+
+---
+
+## CAP Theorem
+
+The CAP theorem describes trade-offs in distributed systems.
+
+A distributed system can only fully guarantee two out of three properties:
+
+- Consistency
+- Availability
+- Partition Tolerance
+
+Since network partitions are unavoidable in distributed systems, systems typically choose between:
+
+- Strong consistency
+- High availability
+
+Different databases make different trade-offs depending on their goals.
+
+---
+
+## Linearizable Databases
+
+A linearizable database guarantees that all operations appear to occur in a single global order.
+
+This means:
+
+- Every client sees the same sequence of operations
+- Reads always reflect the latest committed write
+
+Linearizability is one of the strongest consistency guarantees.
+
+---
+
+## Total Order Broadcast
+
+To achieve linearizability, distributed systems often rely on **total order broadcast**.
+
+This ensures:
+
+- Every node receives operations in the same order
+- All replicas apply changes identically
+
+This forms the foundation of replicated distributed logs.
+
+---
+
+## Distributed Consensus
+
+Consensus algorithms allow distributed nodes to agree on a shared sequence of operations.
+
+This is critical for:
+
+- Replication
+- Leader election
+- Fault tolerance
+- Consistency
+
+Consensus systems often maintain a distributed log where every node stores the same ordered sequence of entries.
+
+---
+
+## Raft Algorithm
+
+Raft is a distributed consensus algorithm designed to be understandable and practical.
+
+Its primary goal is maintaining a replicated, fault-tolerant log.
+
+### Raft Leader Election
+
+At any point in time:
+
+- One node acts as leader
+- Other nodes act as followers
+
+If the leader fails:
+
+- Followers hold an election
+- A new leader is chosen
+
+This allows the system to continue operating despite failures.
+
+### Raft Writes
+
+All writes go through the leader.
+
+#### Write Flow
+
+1. Client sends request to leader
+2. Leader appends entry to its log
+3. Followers replicate the log entry
+4. Majority acknowledges replication
+5. Entry becomes committed
+6. Leader responds to client
+
+```text
+ Client
+   |
+ Leader
+ /  |  \
+F1  F2  F3
+```
+
+This ensures every replica eventually reaches the same state.
+
+### Raft Log Backfill
+
+If a follower falls behind:
+
+- Leader sends missing log entries
+- Follower catches up
+- Replica returns to consistent state
+
+This process is called **log backfilling**.
+
+### Conclusion: Raft
+
+Raft provides:
+
+- Fault tolerance
+- Strong consistency
+- Reliable replication
+
+However, it also introduces trade-offs:
+
+- Increased latency
+- Coordination overhead
+- Slower writes compared to eventually consistent systems
+
+Raft solves replication consistency, but it does not replace distributed transaction protocols like two-phase commit.
+
+---
+
+## Coordination Services
+
+Distributed systems often require a reliable way to coordinate critical metadata.
+
+Examples include:
+
+- Configuration management
+- Service discovery
+- Distributed locks
+- Leader election
+
+Coordination services typically provide a **strongly consistent** key-value store.
+
+---
+
+## ZooKeeper
+
+ZooKeeper is a **coordination service designed for distributed systems**.
+
+It is commonly used to manage:
+
+- Cluster metadata
+- Configuration
+- Distributed synchronization
+- Leader election
+
+ZooKeeper itself is **built on top of distributed consensus principles**.
+
+### Key Characteristics
+
+- Provides linearizable writes
+- Ensures strong consistency
+- Used for configuration, leader election, locks
+
+### How Reads Work in ZooKeeper
+
+ZooKeeper replicas can serve reads locally.
+
+This improves read performance, but depending on configuration:
+
+- Reads may be slightly stale
+- Strong consistency may require leader coordination
+
+Writes remain strongly ordered and consistent.
+
+### Why Not Use for Application Data?
+
+Although ZooKeeper is highly reliable, it is not designed for high-throughput application storage.
+
+- Too slow for high throughput workloads
+- Designed for coordination, not bulk storage
+
+---
+
+## Conclusion
+
+Distributed systems rely on multiple foundational concepts working together:
+
+- Partitioning enables scalability
+- Consistent hashing reduces rebalancing cost
+- Consensus (Raft) ensures correctness
+- 2PC ensures transactional atomicity across services
+- Coordination services like ZooKeeper provide system-wide agreement
+
+Together, they allow modern systems to scale while maintaining correctness and reliability.
+
+---
+
+## References
+
+[The Raft Consensus Algorithm](https://raft.github.io/)
+
+[Apache ZooKeeper](https://zookeeper.apache.org/)
+
+[Consistent Hashing](https://en.wikipedia.org/wiki/Consistent_hashing)
+
+[Two-Phase Commit Protocol](https://en.wikipedia.org/wiki/Two-phase_commit_protocol)
