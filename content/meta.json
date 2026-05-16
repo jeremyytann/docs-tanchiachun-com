@@ -60,6 +60,7 @@
     "---Software Engineering---",
     "api-versioning",
     "caching-strategies",
+    "distributed-caching",
     "semantic-versioning-and-changelogs",
     "technical-debt"
   ]
