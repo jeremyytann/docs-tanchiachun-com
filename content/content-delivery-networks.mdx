@@ -1,0 +1,261 @@
+---
+title: "Content Delivery Networks (CDNs)"
+description: "An introduction to Content Delivery Networks, geographic sharding, push CDNs, and pull CDNs for improving performance and scalability on the web."
+tags: ["Networking", "CDN", "Performance", "Distributed Systems", "Web Infrastructure"]
+---
+
+## Introduction
+
+As applications grow globally, serving content from a single server location becomes increasingly inefficient.
+
+Users who are physically far away from the origin server experience:
+
+- Higher latency
+- Slower page load times
+- Increased network delays
+- Poor user experience
+
+For example:
+
+- A user in Malaysia accessing a server in the United States may experience noticeable delays due to physical network distance.
+
+This is where **Content Delivery Networks (CDNs)** become important.
+
+A CDN is a globally distributed network of servers that caches and delivers content closer to users.
+
+Instead of every request traveling to the origin server, users are served from nearby edge servers.
+
+CDNs help improve:
+
+- Performance
+- Scalability
+- Availability
+- Reliability
+
+---
+
+## How CDNs Work
+
+CDNs place servers in multiple geographic regions around the world.
+
+These servers are commonly called:
+
+- Edge servers
+- Edge nodes
+- Points of Presence (PoPs)
+
+When a user requests content:
+
+1. Request is routed to the nearest CDN edge server
+2. CDN checks whether content already exists in cache
+3. If cached, content is served immediately
+4. Otherwise, CDN fetches content from the origin server
+5. CDN stores the content for future requests
+
+### Example
+
+```text
+     User
+      |
+Nearest CDN Edge
+      |
+ Origin Server
+```
+
+This significantly reduces network travel distance.
+
+---
+
+## Benefits of CDNs
+
+CDNs provide several major advantages.
+
+### Reduced Latency
+
+Users receive content from nearby edge servers instead of distant origin servers.
+
+This improves:
+
+- Page load speed
+- API response times
+- Media streaming performance
+
+### Reduced Origin Server Load
+
+Since CDN edge servers cache content:
+
+- Fewer requests reach the origin server
+- Database and backend load decreases
+- Infrastructure costs may be reduced
+
+### Improved Scalability
+
+CDNs help applications handle large traffic spikes.
+
+Popular content can be distributed across many edge locations instead of overwhelming a single server.
+
+### Improved Availability
+
+If one edge location experiences issues, traffic can often be routed to another nearby location.
+
+This improves system resilience and fault tolerance.
+
+---
+
+## Geographic Sharding
+
+Geographic sharding distributes traffic or data based on geographic regions.
+
+Instead of all users accessing the same infrastructure:
+
+* Asian users may connect to Asian servers
+* European users may connect to European servers
+* American users may connect to American servers
+
+### Example
+
+```text
+Asia Users   -> Singapore Server
+Europe Users -> Germany Server
+US Users     -> Virginia Server
+```
+
+This reduces:
+
+* Network latency
+* Cross-region traffic
+* Bandwidth costs
+
+Geographic sharding is commonly used alongside CDNs to improve regional performance.
+
+---
+
+## Push CDN
+
+In a push CDN model:
+
+* Content is proactively uploaded to CDN edge servers
+* Origin server pushes files to the CDN
+
+### Flow
+
+```text
+Origin Server
+      |
+  Push Files
+      |
+     CDN
+      |
+    Users
+```
+
+### Advantages
+
+* Faster first-time access
+* Better control over cached content
+* Useful for static assets and media files
+
+### Disadvantages
+
+* Requires manual or automated upload management
+* Storage costs may increase
+* Unused files may still occupy CDN storage
+
+Push CDNs are commonly used for:
+
+* Videos
+* Images
+* Large static assets
+* Software downloads
+
+---
+
+## Pull CDN
+
+In a pull CDN model:
+
+* CDN fetches content from the origin server only when requested
+* Content is cached automatically after the first request
+
+### Flow
+
+```text
+ User Request
+      |
+     CDN
+      |
+  Cache Miss
+      |
+Origin Server
+```
+
+### Advantages
+
+* Simpler setup
+* Automatic caching
+* No manual content uploads required
+
+### Disadvantages
+
+* First request may be slower
+* Origin server still handles cache misses
+* Cache warm-up may take time
+
+Pull CDNs are commonly used for:
+
+* Websites
+* APIs
+* Dynamic web applications
+
+Most modern CDN providers primarily use pull-based caching.
+
+---
+
+## Push vs Pull CDN
+
+Both CDN models provide different trade-offs.
+
+| Type     | Content Delivery   | Setup Complexity | First Request Speed     |
+| -------- | ------------------ | ---------------- | ----------------------- |
+| Push CDN | Pre-uploaded       | Higher           | Faster                  |
+| Pull CDN | On-demand fetching | Lower            | Slower on first request |
+
+The best approach depends on:
+
+* Traffic patterns
+* Content size
+* Update frequency
+* Operational requirements
+
+---
+
+## Conclusion
+
+Content Delivery Networks are one of the most important technologies for scaling modern internet applications.
+
+By distributing content closer to users, CDNs help improve:
+
+* Performance
+* Reliability
+* Scalability
+* Availability
+
+Concepts such as:
+
+* Geographic sharding
+* Edge caching
+* Push CDNs
+* Pull CDNs
+
+allow systems to efficiently serve users across the world.
+
+As applications become increasingly global, CDNs play a critical role in reducing latency and improving user experience.
+
+---
+
+## References
+
+* [Cloudflare - What is a CDN?](https://www.cloudflare.com/learning/cdn/what-is-a-cdn/)
+* [Amazon CloudFront](https://aws.amazon.com/cloudfront/)
+* [Content delivery network on Wikipedia](https://en.wikipedia.org/wiki/Content_delivery_network)
+* [Content Delivery Network - MDN Web Docs](https://developer.mozilla.org/en-US/docs/Glossary/CDN)

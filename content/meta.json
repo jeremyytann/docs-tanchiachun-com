@@ -27,6 +27,7 @@
     "shallow-and-deep-comparison",
     "web-workers-vs-service-workers",
     "---Networking---",
+    "content-delivery-networks",
     "cors",
     "http-caching",
     "http-methods",
